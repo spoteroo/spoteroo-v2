@@ -17,13 +17,19 @@ export default function Home() {
         </p>
 
         <div className="mt-12 flex gap-4">
-          <button className="px-6 py-3 bg-white text-black rounded-xl">
-            Explore Trends
-          </button>
+          <a
+  href="/trends"
+  className="px-6 py-3 bg-white text-black rounded-xl inline-block"
+>
+  Explore Trends
+</a>
 
-          <button className="px-6 py-3 border border-gray-600 rounded-xl">
-            Join Newsletter
-          </button>
+          <a
+  href="/newsletter"
+  className="px-6 py-3 border border-gray-600 rounded-xl inline-block"
+>
+  Join Newsletter
+</a>
         </div>
       </section>
     </main>
