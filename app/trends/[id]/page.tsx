@@ -16,30 +16,35 @@ type Trend = {
 
 export default function TrendDetailPage() {
   const params = useParams();
-  const id = params.id;
+  const id = params.id;console.log("PARAM ID:", id);
 
   const [trend, setTrend] = useState<Trend | null>(null);
 
   useEffect(() => {
-    const fetchTrend = async () => {
-      const { data, error } = await supabase
-        .from("trends")
-        .select("*")
-        .eq("id", id)
-        .single();
+  const fetchTrend = async () => {
+    console.log("Fetching trend:", id);
 
-      if (error) {
-        console.error(error);
-        return;
-      }
+    const { data, error } = await supabase
+      .from("trends")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-      setTrend(data);
-    };
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
 
-    if (id) {
-      fetchTrend();
+    if (error) {
+      console.error(error);
+      return;
     }
-  }, [id]);
+
+    setTrend(data);
+  };
+
+  if (id) {
+    fetchTrend();
+  }
+}, [id]);
 
   if (!trend) {
     return (
