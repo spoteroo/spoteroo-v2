@@ -105,8 +105,7 @@ const [search, setSearch] = useState("");
                 </p>
               </div>
             </Link>
-          ))}
-        </div>
+                    ))}
       </div>
     </main>
   );

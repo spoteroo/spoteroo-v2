@@ -72,19 +72,20 @@ Include:
   });
 
 const newsletterHtml =
-  aiResponse.output_text;
+  aiResponse.output_text ||
+  "<h1>No content generated</h1>";
   console.log(newsletterHtml);
 console.log("Subscribers found:", emails);
 
     if (emails.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "No subscribers found",
-        },
-        { status: 400 }
-      );
-    }
+  return NextResponse.json(
+    {
+      success: false,
+      error: "No subscribers found",
+    },
+    { status: 400 }
+  );
+}
 
     console.log("Sending to:", emails);
 
@@ -92,7 +93,7 @@ console.log("Subscribers found:", emails);
 const result = await resend.emails.send({
   from: "newsletter@spoteroo.com",
   to: emails,
-  subject: "Spoteroo Weekly Trends",
+  subject: "🚀 Spoteroo Weekly Startup Trends",
   html: newsletterHtml,
 });
 
