@@ -10,11 +10,17 @@ type Trend = {
   description: string;
   category: string;
   score: number;
-  reason: string;
+  reason: string | null;
+
+  startup_idea?: string | null;
+  market_analysis?: string | null;
+  competitors?: string | null;
+  risks?: string | null;
 };
 
 export default function TrendsPage() {
   const [trends, setTrends] = useState<Trend[]>([]);
+const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function fetchTrends() {
@@ -37,9 +43,46 @@ export default function TrendsPage() {
         <h1 className="text-5xl font-bold mb-8">
           Emerging Trends
         </h1>
+        <input
+  type="text"
+  placeholder="Search trends..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="w-full p-4 rounded-xl bg-gray-900 text-white mb-8 border border-gray-800"
+/>
 
-        <div className="space-y-6">
-          {trends.map((trend) => (
+        <p className="text-gray-400 mb-4">
+  {
+    trends.filter((trend) => {
+      const q = search.toLowerCase();
+
+      const category =
+        trend.category?.toLowerCase() || "";
+
+      return (
+        trend.title.toLowerCase().includes(q) ||
+        category.includes(q) ||
+        trend.description.toLowerCase().includes(q) ||
+        (q === "fintech" && category === "finance")
+      );
+    }).length
+  } trends found
+</p>
+          {trends
+  .filter((trend) => {
+    const q = search.toLowerCase();
+
+    const category =
+      trend.category?.toLowerCase() || "";
+
+    return (
+      trend.title.toLowerCase().includes(q) ||
+      category.includes(q) ||
+      trend.description.toLowerCase().includes(q) ||
+      (q === "fintech" && category === "finance")
+    );
+  })
+  .map((trend) => (
             <Link
               key={trend.id}
               href={`/trends/${trend.id}`}
