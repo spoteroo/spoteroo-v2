@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020617;
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -12,15 +12,59 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background:
+    radial-gradient(
+      circle at top,
+      #0f172a 0%,
+      #020617 45%,
+      #000000 100%
+    );
+
+  color: white;
+
+  min-height: 100vh;
+
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.glass {
+  background: rgba(2, 6, 23, 0.75);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(59, 130, 246, 0.12);
+
+  border-radius: 24px;
+
+  box-shadow:
+    0 0 25px rgba(59,130,246,.08),
+    inset 0 1px 0 rgba(255,255,255,.04);
+
+  transition: all .3s ease;
+}
+
+.glass:hover {
+  border-color: rgba(59,130,246,.35);
+
+  box-shadow:
+    0 0 40px rgba(59,130,246,.15),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.glass-input {
+  background: rgba(2, 6, 23, 0.6);
+
+  color: white;
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  backdrop-filter: blur(20px);
+
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-input::placeholder {
+  color: rgba(255,255,255,.45);
 }

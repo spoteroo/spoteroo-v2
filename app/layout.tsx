@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import UserMenu from "./components/navbar/UserMenu";
 import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
@@ -32,34 +33,173 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
-       <nav className="bg-black text-white px-6 py-8">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <body
+        className="
+          min-h-screen
+          bg-gradient-to-br
+          from-black
+          via-slate-950
+          to-black
+          text-white
+        "
+      >
+        <nav
+          className="
+            sticky top-0 z-50
+            backdrop-blur-xl
+            bg-black/50
+            border-b border-white/10
+            px-6 py-5
+          "
+        >
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center gap-3"
+            >
+              <Image
+  src="/logo.svg"
+  alt="Spoteroo"
+  width={56}
+  height={56}
+  priority
+/>
 
-          <Link href="/" className="flex items-center gap-3">
-  <img
-    src="/logo.svg"
-    alt="Spoteroo"
-    width="80"
-    height="80"
-  />
+              <span
+                className="
+                  font-bold
+                  text-2xl
+                  tracking-tight
+                "
+              >
+                Spoteroo
+              </span>
+            </Link>
 
-  <span className="font-bold text-2xl">
-    Spoteroo
-  </span>
-</Link>
+            {/* Navigation */}
+            <div className="flex items-center gap-8">
+  <Link
+    href="/"
+    className="hover:text-blue-400 transition"
+  >
+    Home
+  </Link>
 
-            <div className="flex gap-6">
-              <Link href="/">Home</Link>
-              <Link href="/trends">Trends</Link>
-              <Link href="/newsletter">Newsletter</Link>
-              <Link href="/about">About</Link>
-            </div>
+  <Link
+    href="/trends"
+    className="hover:text-blue-400 transition"
+  >
+    Trends
+  </Link>
 
+  <Link
+    href="/favorites"
+    className="hover:text-blue-400 transition"
+  >
+    Favorites
+  </Link>
+
+  <Link
+    href="/newsletter"
+    className="hover:text-blue-400 transition"
+  >
+    Newsletter
+  </Link>
+
+  <Link
+    href="/dashboard"
+    className="hover:text-blue-400 transition"
+  >
+    Dashboard
+  </Link>
+
+  <Link
+    href="/about"
+    className="hover:text-blue-400 transition"
+  >
+    About
+  </Link>
+
+  <UserMenu />
+</div>
           </div>
         </nav>
 
-        {children}
+        <>
+  {children}
+
+  <footer
+    className="
+      border-t border-white/10
+      mt-20
+      py-10
+    "
+  >
+    <div className="max-w-6xl mx-auto px-6">
+      <div className="flex flex-col md:flex-row justify-between gap-10">
+
+        <div>
+          <h3 className="text-2xl font-bold">
+            Spoteroo
+          </h3>
+
+          <p className="text-slate-400 mt-2 max-w-md">
+            Discover emerging startup opportunities,
+            future markets, and high-growth trends
+            before they become mainstream.
+          </p>
+        </div>
+
+        <div>
+          <h4 className="font-semibold mb-3">
+            Product
+          </h4>
+
+          <div className="space-y-2 text-slate-400">
+            <Link href="/trends">
+              Trends
+            </Link>
+
+            <br />
+
+            <Link href="/newsletter">
+              Newsletter
+            </Link>
+
+            <br />
+
+            <Link href="/favorites">
+              Favorites
+            </Link>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-semibold mb-3">
+            Company
+          </h4>
+
+          <div className="space-y-2 text-slate-400">
+            <Link href="/about">
+              About
+            </Link>
+
+            <br />
+
+            <Link href="/dashboard">
+              Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-white/10 mt-8 pt-8 text-slate-500 text-sm">
+        © 2026 Spoteroo. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</>
       </body>
     </html>
   );

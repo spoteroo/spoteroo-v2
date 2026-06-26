@@ -9,93 +9,184 @@ export default async function Home() {
     .limit(3);
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <section className="max-w-6xl mx-auto px-6 py-24">
+    <main className="min-h-screen text-white">
+      <section className="max-w-7xl mx-auto px-6 py-20">
+
         {/* Hero */}
-        <h1 className="text-7xl md:text-8xl font-bold mb-6">
-          Spoteroo
-        </h1>
+        <div className="text-center mb-24">
+          <h1
+            className="
+              text-7xl
+              md:text-8xl
+              font-extrabold
+              bg-gradient-to-r
+              from-white
+              via-blue-300
+              to-cyan-400
+              bg-clip-text
+              text-transparent
+              mb-6
+            "
+          >
+            Spot Tomorrow's
+            <br />
+            Opportunities Today
+          </h1>
 
-        <p className="text-2xl text-gray-300 mb-8">
-          Spot Emerging Startup Opportunities
-        </p>
+          <p className="text-2xl text-slate-300 mb-6">
+            Discover emerging startup trends before everyone else.
+          </p>
 
-        <p className="text-lg text-gray-400 max-w-3xl">
-          AI-powered opportunity intelligence platform that discovers
-          emerging trends, startups, technologies, keywords, and market
-          opportunities before they become mainstream.
-        </p>
+          <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+            Spoteroo helps founders, investors, and builders discover
+            high-potential trends, startup opportunities, and market shifts
+            before they become mainstream.
+          </p>
 
-        {/* Stats */}
-        <div className="mt-10 flex gap-8 text-gray-400">
-          <div>
-            <div className="text-2xl font-bold text-white">
-              5+
-            </div>
-            <div>Trends Tracked</div>
-          </div>
+          <div className="flex justify-center gap-4 mt-10 flex-wrap">
+            <Link
+              href="/trends"
+              className="
+                bg-blue-600
+                px-8 py-4
+                rounded-xl
+                font-semibold
+                hover:bg-blue-500
+                transition
+                shadow-[0_0_25px_rgba(59,130,246,0.4)]
+              "
+            >
+              Explore Trends
+            </Link>
 
-          <div>
-            <div className="text-2xl font-bold text-white">
-              AI
-            </div>
-            <div>Top Category</div>
-          </div>
-
-          <div>
-            <div className="text-2xl font-bold text-white">
-              Weekly
-            </div>
-            <div>Trend Reports</div>
+            <Link
+              href="/newsletter"
+              className="
+                glass
+                px-8 py-4
+                rounded-xl
+                font-semibold
+              "
+            >
+              Join Newsletter
+            </Link>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="mt-12 flex gap-4">
-          <Link
-            href="/trends"
-            className="px-6 py-3 bg-white text-black rounded-xl"
-          >
-            Explore Trends
-          </Link>
+        {/* Stats */}
+        <div className="grid md:grid-cols-3 gap-6 mb-24">
+          <div className="glass p-8 text-center">
+            <h3 className="text-5xl font-bold text-white">
+              500+
+            </h3>
+            <p className="text-slate-400 mt-2">
+              Trends Tracked
+            </p>
+          </div>
 
-          <Link
-            href="/newsletter"
-            className="px-6 py-3 border border-gray-600 rounded-xl"
-          >
-            Join Newsletter
-          </Link>
+          <div className="glass p-8 text-center">
+            <h3 className="text-5xl font-bold text-white">
+              50+
+            </h3>
+            <p className="text-slate-400 mt-2">
+              Categories
+            </p>
+          </div>
+
+          <div className="glass p-8 text-center">
+            <h3 className="text-5xl font-bold text-white">
+              10K+
+            </h3>
+            <p className="text-slate-400 mt-2">
+              Monthly Readers
+            </p>
+          </div>
+        </div>
+
+        {/* Features */}
+        <div className="grid md:grid-cols-3 gap-6 mb-24">
+          <div className="glass p-8">
+            <h3 className="text-2xl font-bold mb-4">
+              🔍 Trend Discovery
+            </h3>
+
+            <p className="text-slate-400">
+              Discover emerging technologies,
+              industries, and startup opportunities.
+            </p>
+          </div>
+
+          <div className="glass p-8">
+            <h3 className="text-2xl font-bold mb-4">
+              💡 Startup Ideas
+            </h3>
+
+            <p className="text-slate-400">
+              Generate startup concepts from
+              validated market trends.
+            </p>
+          </div>
+
+          <div className="glass p-8">
+            <h3 className="text-2xl font-bold mb-4">
+              📈 Market Analysis
+            </h3>
+
+            <p className="text-slate-400">
+              Understand competitors, risks,
+              and market potential instantly.
+            </p>
+          </div>
         </div>
 
         {/* Top Trends */}
-        <section className="mt-24">
-          <h2 className="text-4xl font-bold mb-8">
+        <section className="mb-24">
+          <h2 className="text-5xl font-bold mb-10">
             Top Trends
           </h2>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             {trends?.map((trend) => (
               <Link
                 key={trend.id}
                 href={`/trends/${trend.id}`}
               >
-                <div className="border border-gray-800 rounded-xl p-6 hover:border-blue-500 transition cursor-pointer">
-                  <div className="flex justify-between mb-2">
-                    <h3 className="text-2xl font-bold">
-                      {trend.title}
-                    </h3>
+                <div
+                  className="
+                    glass
+                    p-6
+                    cursor-pointer
+                    transition-all
+                    duration-300
+                    hover:-translate-y-1
+                  "
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-2xl font-bold">
+                        {trend.title}
+                      </h3>
 
-                    <span className="text-green-400">
+                      <p className="text-slate-400 mt-3">
+                        {trend.description}
+                      </p>
+                    </div>
+
+                    <span
+                      className="
+                        px-4 py-2
+                        rounded-full
+                        bg-green-500/15
+                        text-green-300
+                        border border-green-500/20
+                      "
+                    >
                       {trend.score}
                     </span>
                   </div>
 
-                  <p className="text-gray-400">
-                    {trend.description}
-                  </p>
-
                   {trend.reason && (
-                    <p className="text-gray-500 italic mt-3">
+                    <p className="text-slate-500 mt-4 italic">
                       {trend.reason}
                     </p>
                   )}
@@ -105,24 +196,35 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Newsletter CTA */}
-        <section className="mt-24 border-t border-gray-800 pt-12">
-          <h2 className="text-4xl font-bold mb-4">
-            Get Weekly Trend Reports
+        {/* CTA */}
+        <section className="glass p-12 text-center">
+          <h2 className="text-5xl font-bold mb-6">
+            Ready to discover the next
+            billion-dollar opportunity?
           </h2>
 
-          <p className="text-gray-400 mb-6">
-            Join Spoteroo and receive the top emerging
-            trends directly in your inbox every week.
+          <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
+            Join Spoteroo and stay ahead of emerging
+            markets, startup opportunities, and future trends.
           </p>
 
           <Link
-            href="/newsletter"
-            className="inline-block bg-white text-black px-6 py-3 rounded-xl font-semibold"
+            href="/trends"
+            className="
+              inline-block
+              bg-blue-600
+              px-8 py-4
+              rounded-xl
+              font-semibold
+              hover:bg-blue-500
+              transition
+              shadow-[0_0_25px_rgba(59,130,246,0.4)]
+            "
           >
-            Subscribe Free
+            Start Exploring →
           </Link>
         </section>
+
       </section>
     </main>
   );

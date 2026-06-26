@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../../lib/supabase";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -69,7 +69,20 @@ export default function LoginPage() {
           <button
             onClick={login}
             disabled={loading}
-            className="mt-6 w-full rounded-2xl bg-blue-600 py-3 font-semibold text-white"
+            className="
+              mt-6
+              w-full
+              rounded-2xl
+              bg-blue-600
+              py-3
+              font-semibold
+              text-white
+              transition-all
+              hover:bg-blue-500
+              hover:shadow-[0_0_40px_rgba(59,130,246,0.5)]
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
           >
             {loading ? "Sending..." : "Send Magic Link"}
           </button>
