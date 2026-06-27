@@ -1,4 +1,7 @@
-await supabase.from("profiles").insert({
-  id: user.id,
-  email: user.email,
-});
+import { NextResponse } from "next/server";
+
+export async function POST() {
+  return NextResponse.json({
+    success: true,
+  });
+}

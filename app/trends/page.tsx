@@ -22,9 +22,8 @@ export default function TrendsPage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState("All");
+const [sortBy, setSortBy] = useState("score");
 
-    const [sortBy, setSortBy] =
-  useState("score");
 
   useEffect(() => {
     async function fetchTrends() {
@@ -52,55 +51,22 @@ export default function TrendsPage() {
   const filteredTrends = trends
   .filter((trend) => {
     const matchesSearch =
-      trend.title
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      trend.description
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      trend.category
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      trend.title.toLowerCase().includes(search.toLowerCase()) ||
+      trend.description.toLowerCase().includes(search.toLowerCase()) ||
+      trend.category.toLowerCase().includes(search.toLowerCase());
 
     const matchesCategory =
-      selectedCategory === "All"
-        ? true
-        : trend.category === selectedCategory;
+      selectedCategory === "All" ||
+      trend.category === selectedCategory;
 
-    return (
-      matchesSearch &&
-      matchesCategory
-    );
+    return matchesSearch && matchesCategory;
   })
   .sort((a, b) => {
     if (sortBy === "score") {
       return b.score - a.score;
     }
 
-    return a.title.localeCompare(
-      b.title
-    );
-  });
-    const matchesSearch =
-      trend.title
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      trend.description
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      trend.category
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-    const matchesCategory =
-      selectedCategory === "All"
-        ? true
-        : trend.category === selectedCategory;
-
-    return (
-      matchesSearch &&
-      matchesCategory
-    );
+    return a.title.localeCompare(b.title);
   });
 
   return (
@@ -164,6 +130,29 @@ export default function TrendsPage() {
         <p className="text-gray-400 mb-6">
           {filteredTrends.length} trends found
         </p>
+
+<div className="mb-6">
+  <select
+    value={sortBy}
+    onChange={(e) => setSortBy(e.target.value)}
+    className="
+      bg-slate-900
+      border
+      border-slate-700
+      rounded-xl
+      px-4
+      py-2
+    "
+  >
+    <option value="score">
+      Highest Score
+    </option>
+
+    <option value="title">
+      Alphabetical
+    </option>
+  </select>
+</div>
 
         <div className="space-y-5">
           {filteredTrends.map((trend) => (

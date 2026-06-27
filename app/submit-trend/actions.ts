@@ -7,7 +7,9 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function submitTrend(formData: FormData) {
+export async function submitTrend(
+  formData: FormData
+): Promise<void> {
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const source_url = formData.get("source_url") as string;
@@ -29,8 +31,4 @@ export async function submitTrend(formData: FormData) {
   if (error) {
     throw new Error(error.message);
   }
-
-  return {
-    success: true,
-  };
 }
