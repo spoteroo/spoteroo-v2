@@ -100,15 +100,15 @@ export default function PricingPage() {
             Premium Trend Analysis
           </p>
 
-          <button
-            onClick={() => handleCheckout("yearly")}
-            disabled={loading !== null}
-            className="mt-6 w-full bg-green-600 hover:bg-green-700 rounded-lg py-3 font-semibold disabled:opacity-50"
-          >
-            {loading === "yearly"
-              ? "Redirecting..."
-              : "Upgrade Yearly"}
-          </button>
+         <button
+  onClick={() =>
+    window.location.href =
+      "https://checkout.dodopayments.com/buy/pdt_0NhBa6L4p8lBA35za31WC?quantity=1&redirect_url=https://spoteroo.com/dashboard"
+  }
+  className="mt-6 bg-green-600 px-6 py-3 rounded-lg"
+>
+  Upgrade Yearly
+</button>
 
         </div>
 
