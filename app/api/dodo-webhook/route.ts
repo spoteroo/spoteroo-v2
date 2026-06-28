@@ -1,35 +1,31 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  console.error("GET webhook called");
+
   return NextResponse.json({
     message: "Dodo Webhook is running",
   });
 }
 
 export async function POST(request: Request) {
+  console.error("========== WEBHOOK RECEIVED ==========");
+
   try {
-    const headers = Object.fromEntries(request.headers.entries());
     const body = await request.text();
 
-    console.log("========== DODO WEBHOOK ==========");
-    console.log("Headers:");
-    console.log(headers);
-    console.log("Body:");
-    console.log(body);
+    console.error("BODY:");
+    console.error(body);
 
     return NextResponse.json({
       success: true,
     });
-  } catch (error) {
-    console.error("Webhook Error:", error);
+  } catch (e) {
+    console.error(e);
 
     return NextResponse.json(
-      {
-        success: false,
-      },
-      {
-        status: 500,
-      }
+      { success: false },
+      { status: 500 }
     );
   }
 }
