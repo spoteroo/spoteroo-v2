@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  console.error("GET webhook called");
+  console.log("GET webhook called");
 
   return NextResponse.json({
     message: "Dodo Webhook is running",
@@ -9,23 +9,19 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  console.error("========== WEBHOOK RECEIVED ==========");
+  console.log("🔥🔥🔥 DODO POST RECEIVED 🔥🔥🔥");
 
-  try {
-    const body = await request.text();
+  const body = await request.text();
 
-    console.error("BODY:");
-    console.error(body);
+  console.log("BODY:");
+  console.log(body);
 
-    return NextResponse.json({
+  return NextResponse.json(
+    {
       success: true,
-    });
-  } catch (e) {
-    console.error(e);
-
-    return NextResponse.json(
-      { success: false },
-      { status: 500 }
-    );
-  }
+    },
+    {
+      status: 200,
+    }
+  );
 }
