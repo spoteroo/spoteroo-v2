@@ -43,37 +43,37 @@ export async function POST(request: Request) {
       }),
     });
 
-   const data = await response.json();
+    const data = await response.json();
 
-console.log("========== DODO RESPONSE ==========");
-console.log("Status:", response.status);
-console.log(JSON.stringify(data, null, 2));
+    console.log("========== DODO RESPONSE ==========");
+    console.log("Status:", response.status);
+    console.log(JSON.stringify(data, null, 2));
 
-if (!response.ok) {
-  return NextResponse.json(
-    {
-      error: data,
-    },
-    {
-      status: response.status,
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          error: data,
+        },
+        {
+          status: response.status,
+        }
+      );
     }
-  );
-}
 
     return NextResponse.json({
       checkout_url: data.checkout_url,
     });
-  } 
-  catch (error: any) {
-  console.error("CHECKOUT ERROR");
-  console.error(error);
+  } catch (error: any) {
+    console.error("========== CHECKOUT ERROR ==========");
+    console.error(error);
 
-  return NextResponse.json(
-    {
-      error: error.message,
-    },
-    {
-      status: 500,
-    }
-  );
+    return NextResponse.json(
+      {
+        error: error?.message || "Internal server error",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }
