@@ -43,30 +43,37 @@ export async function POST(request: Request) {
       }),
     });
 
-    const data = await response.json();
+   const data = await response.json();
 
-    if (!response.ok) {
-      console.error(data);
+console.log("========== DODO RESPONSE ==========");
+console.log("Status:", response.status);
+console.log(JSON.stringify(data, null, 2));
 
-      return NextResponse.json(
-        {
-          error: "Unable to create checkout session",
-        },
-        { status: 500 }
-      );
+if (!response.ok) {
+  return NextResponse.json(
+    {
+      error: data,
+    },
+    {
+      status: response.status,
     }
+  );
+}
 
     return NextResponse.json({
       checkout_url: data.checkout_url,
     });
-  } catch (error) {
-    console.error(error);
+  } 
+  catch (error: any) {
+  console.error("CHECKOUT ERROR");
+  console.error(error);
 
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-      },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    {
+      error: error.message,
+    },
+    {
+      status: 500,
+    }
+  );
 }
