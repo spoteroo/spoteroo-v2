@@ -25,15 +25,21 @@ export async function POST(request: Request) {
       const subscriptionId = payload.data.subscription_id;
       const status = payload.data.status;
 
-      const { error } = await supabaseAdmin
-        .from("profiles")
-        .update({
-          plan: "pro",
-          subscription_status: status,
-          dodo_customer_id: customerId,
-          dodo_subscription_id: subscriptionId,
-        })
-        .eq("email", email);
+      const { data, error } = await supabaseAdmin
+  .from("profiles")
+  .update({
+    plan: "pro",
+    subscription_status: status,
+    dodo_customer_id: customerId,
+    dodo_subscription_id: subscriptionId,
+  })
+  .eq("email", email)
+  .select();
+
+console.log("========== SUPABASE UPDATE ==========");
+console.log("Webhook email:", email);
+console.log("Updated rows:", data);
+console.log("Supabase error:", error);
 
       if (error) {
         console.error(error);
