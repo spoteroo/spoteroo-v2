@@ -9,19 +9,16 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  console.log("🔥🔥🔥 DODO POST RECEIVED 🔥🔥🔥");
+  console.log("========== DODO WEBHOOK ==========");
+
+  const headers = Object.fromEntries(request.headers.entries());
+  console.log("HEADERS:");
+  console.log(JSON.stringify(headers, null, 2));
 
   const body = await request.text();
 
   console.log("BODY:");
   console.log(body);
 
-  return NextResponse.json(
-    {
-      success: true,
-    },
-    {
-      status: 200,
-    }
-  );
+  return Response.json({ success: true });
 }
