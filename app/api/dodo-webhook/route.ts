@@ -16,37 +16,46 @@ export async function POST(request: Request) {
 
     const event = payload.type;
 
+    console.log("Event Type:", event);
+
     if (
       event === "subscription.active" ||
       event === "payment.succeeded"
     ) {
+      console.log("ENTERED UPDATE BLOCK");
+
       const email = payload.data.customer.email;
       const customerId = payload.data.customer.customer_id;
       const subscriptionId = payload.data.subscription_id;
       const status = payload.data.status;
 
-      const { data, error } = await supabaseAdmin
-  .from("profiles")
-  .update({
-    plan: "pro",
-    subscription_status: status,
-    dodo_customer_id: customerId,
-    dodo_subscription_id: subscriptionId,
-  })
-  .eq("email", email)
-  .select();
+      console.log("Webhook Email:", email);
+      console.log("Customer ID:", customerId);
+      console.log("Subscription ID:", subscriptionId);
+      console.log("Status:", status);
 
-console.log("========== SUPABASE UPDATE ==========");
-console.log("Webhook email:", email);
-console.log("Updated rows:", data);
-console.log("Supabase error:", error);
+      const { data, error } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          plan: "pro",
+          subscription_status: status,
+          dodo_customer_id: customerId,
+          dodo_subscription_id: subscriptionId,
+        })
+        .eq("email", email)
+        .select();
+
+      console.log("========== SUPABASE UPDATE ==========");
+      console.log("Updated Rows:", data);
+      console.log("Supabase Error:", error);
 
       if (error) {
-        console.error(error);
+        console.error("Supabase Update Failed:", error);
 
         return NextResponse.json(
           {
             success: false,
+            error: error.message,
           },
           {
             status: 500,
@@ -54,14 +63,20 @@ console.log("Supabase error:", error);
         );
       }
 
-      console.log("Profile upgraded:", email);
+      if (!data || data.length === 0) {
+        console.log("⚠️ No profile found for email:", email);
+      } else {
+        console.log("✅ Profile upgraded:", email);
+      }
+    } else {
+      console.log("Ignoring event:", event);
     }
 
     return NextResponse.json({
       success: true,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Webhook Error:", error);
 
     return NextResponse.json(
       {
