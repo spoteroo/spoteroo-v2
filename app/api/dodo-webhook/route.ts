@@ -9,6 +9,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.log("WEBHOOK VERSION 2");
     const payload = await request.json();
 
     console.log("========== DODO WEBHOOK ==========");
