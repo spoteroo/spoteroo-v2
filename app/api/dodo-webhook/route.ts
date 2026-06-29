@@ -1,24 +1,69 @@
 import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET() {
-  console.log("GET webhook called");
-
   return NextResponse.json({
     message: "Dodo Webhook is running",
   });
 }
 
 export async function POST(request: Request) {
-  console.log("========== DODO WEBHOOK ==========");
+  try {
+    const payload = await request.json();
 
-  const headers = Object.fromEntries(request.headers.entries());
-  console.log("HEADERS:");
-  console.log(JSON.stringify(headers, null, 2));
+    console.log("========== DODO WEBHOOK ==========");
+    console.log(JSON.stringify(payload, null, 2));
 
-  const body = await request.text();
+    const event = payload.type;
 
-  console.log("BODY:");
-  console.log(body);
+    if (
+      event === "subscription.active" ||
+      event === "payment.succeeded"
+    ) {
+      const email = payload.data.customer.email;
+      const customerId = payload.data.customer.customer_id;
+      const subscriptionId = payload.data.subscription_id;
+      const status = payload.data.status;
 
-  return Response.json({ success: true });
+      const { error } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          plan: "pro",
+          subscription_status: status,
+          dodo_customer_id: customerId,
+          dodo_subscription_id: subscriptionId,
+        })
+        .eq("email", email);
+
+      if (error) {
+        console.error(error);
+
+        return NextResponse.json(
+          {
+            success: false,
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+
+      console.log("Profile upgraded:", email);
+    }
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        success: false,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }
