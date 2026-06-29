@@ -52,8 +52,7 @@ const [sortBy, setSortBy] = useState("score");
   .filter((trend) => {
     const matchesSearch =
       trend.title.toLowerCase().includes(search.toLowerCase()) ||
-      trend.description.toLowerCase().includes(search.toLowerCase()) ||
-      trend.category.toLowerCase().includes(search.toLowerCase());
+      trend.description.toLowerCase().includes(search.toLowerCase());
 
     const matchesCategory =
       selectedCategory === "All" ||
@@ -62,14 +61,13 @@ const [sortBy, setSortBy] = useState("score");
     return matchesSearch && matchesCategory;
   })
   .sort((a, b) => {
-    if (sortBy === "score") {
-      return b.score - a.score;
+    if (sortBy === "title") {
+      return a.title.localeCompare(b.title);
     }
 
-    return a.title.localeCompare(b.title);
+    return b.score - a.score;
   });
-
-  return (
+ return (
     <main className="min-h-screen text-white p-10">
       <div className="max-w-5xl mx-auto">
         <h1

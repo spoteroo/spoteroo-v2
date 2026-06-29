@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET() {
   return NextResponse.json({
@@ -26,6 +26,12 @@ export async function POST(request: Request) {
       console.log("ENTERED UPDATE BLOCK");
 
       const email = payload.data.customer.email;
+      if (!email) {
+  return NextResponse.json(
+    { success: false, error: "Missing customer email" },
+    { status: 400 }
+  );
+}
       const customerId = payload.data.customer.customer_id;
       const subscriptionId = payload.data.subscription_id;
       const status = payload.data.status;
