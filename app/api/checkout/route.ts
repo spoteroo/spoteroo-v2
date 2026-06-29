@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
+import DodoPayments from "dodopayments";
+
+const client = new DodoPayments({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
+  environment: process.env.DODO_PAYMENTS_ENVIRONMENT as
+    | "test_mode"
+    | "live_mode",
+});
 
 export async function POST(request: Request) {
   try {
     const { plan, email } = await request.json();
-
-    if (!plan || !email) {
-      return NextResponse.json(
-        { error: "Missing plan or email" },
-        { status: 400 }
-      );
-    }
 
     const productId =
       plan === "yearly"
@@ -18,58 +19,33 @@ export async function POST(request: Request) {
 
     if (!productId) {
       return NextResponse.json(
-        { error: "Product not configured" },
+        { error: "Product ID missing" },
         { status: 500 }
       );
     }
 
-    const response = await fetch("https://api.dodopayments.com/checkouts", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.DODO_PAYMENTS_API_KEY}`,
-        "Content-Type": "application/json",
+    const session = await client.checkoutSessions.create({
+      product_cart: [
+        {
+          product_id: productId,
+          quantity: 1,
+        },
+      ],
+      customer: {
+        email,
       },
-      body: JSON.stringify({
-        product_cart: [
-          {
-            product_id: productId,
-            quantity: 1,
-          },
-        ],
-        customer: {
-          email,
-        },
-        return_url: process.env.DODO_PAYMENTS_RETURN_URL,
-      }),
+      return_url: process.env.DODO_PAYMENTS_RETURN_URL!,
     });
-
-    const data = await response.json();
-
-    console.log("========== DODO RESPONSE ==========");
-    console.log("Status:", response.status);
-    console.log(JSON.stringify(data, null, 2));
-
-    if (!response.ok) {
-      return NextResponse.json(
-        {
-          error: data,
-        },
-        {
-          status: response.status,
-        }
-      );
-    }
 
     return NextResponse.json({
-      checkout_url: data.checkout_url,
+      checkout_url: session.checkout_url,
     });
-  } catch (error: any) {
-    console.error("========== CHECKOUT ERROR ==========");
-    console.error(error);
+  } catch (error) {
+    console.error("CHECKOUT ERROR:", error);
 
     return NextResponse.json(
       {
-        error: error?.message || "Internal server error",
+        error: String(error),
       },
       {
         status: 500,
