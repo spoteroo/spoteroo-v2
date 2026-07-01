@@ -1,12 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
 export default function PricingPage() {
-  const [loading, setLoading] = useState<"monthly" | "yearly" | null>(null);
+  const router = useRouter();
 
-  async function handleCheckout(plan: "monthly" | "yearly") {
+  const [loading, setLoading] = useState<
+    "monthly" | "yearly" | null
+  >(null);
+
+  async function startCheckout(
+    plan: "monthly" | "yearly",
+    checkoutUrl: string
+  ) {
     try {
       setLoading(plan);
 
@@ -16,63 +24,57 @@ export default function PricingPage() {
 
       if (!user) {
         alert("Please login first.");
-        window.location.href = "/login";
+        router.push("/login");
         return;
       }
 
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          plan,
-          email: user.email,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Checkout failed");
-      }
-
-      window.location.href = data.checkout_url;
+      window.location.href = checkoutUrl;
     } catch (error) {
-      console.error(error);
-      alert("Unable to start checkout.");
+      console.error("Checkout Error:", error);
+      alert("Unable to open checkout.");
     } finally {
       setLoading(null);
     }
   }
 
   return (
-    <main className="max-w-6xl mx-auto p-10">
-      <h1 className="text-5xl font-bold mb-10">
+    <main className="min-h-screen max-w-6xl mx-auto p-10 text-white">
+      <h1 className="text-5xl font-bold mb-10 text-center">
         Spoteroo Pro
       </h1>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-8">
 
-        <div className="border rounded-xl p-6">
-          <h2 className="text-2xl font-bold">Monthly</h2>
+        {/* Monthly Plan */}
 
-          <p className="text-4xl mt-4">$49</p>
+        <div className="glass rounded-2xl p-8 border border-slate-700">
+          <h2 className="text-3xl font-bold">
+            Monthly
+          </h2>
 
-          <p className="mt-4 text-gray-400">
-            Unlimited AI Reports
-            <br />
-            Unlimited Startup Ideas
-            <br />
-            Premium Trend Analysis
-            <br />
-            Priority Support
+          <p className="text-5xl font-bold mt-4">
+            $49
+            <span className="text-lg text-gray-400">
+              /month
+            </span>
           </p>
 
+          <ul className="mt-8 space-y-3 text-gray-300">
+            <li>✅ Unlimited AI Reports</li>
+            <li>✅ Unlimited Startup Ideas</li>
+            <li>✅ Premium Trend Analysis</li>
+            <li>✅ Priority Support</li>
+          </ul>
+
           <button
-            onClick={() => handleCheckout("monthly")}
+            onClick={() =>
+              startCheckout(
+                "monthly",
+                "https://checkout.dodopayments.com/buy/pdt_0NhBCHTFHfDlJoYBnXcTv?quantity=1&redirect_url=https://spoteroo.com/dashboard"
+              )
+            }
             disabled={loading !== null}
-            className="mt-6 w-full bg-blue-600 hover:bg-blue-700 rounded-lg py-3 font-semibold disabled:opacity-50"
+            className="mt-8 w-full rounded-xl bg-blue-600 hover:bg-blue-700 py-3 font-semibold transition disabled:opacity-50"
           >
             {loading === "monthly"
               ? "Redirecting..."
@@ -80,35 +82,50 @@ export default function PricingPage() {
           </button>
         </div>
 
-        <div className="border rounded-xl p-6">
+        {/* Yearly Plan */}
 
-          <h2 className="text-2xl font-bold">
+        <div className="glass rounded-2xl p-8 border border-green-600 relative">
+
+          <div className="absolute top-4 right-4 bg-green-600 text-white text-xs px-3 py-1 rounded-full">
+            Best Value
+          </div>
+
+          <h2 className="text-3xl font-bold">
             Yearly
           </h2>
 
-          <p className="text-4xl mt-4">
+          <p className="text-5xl font-bold mt-4">
             $490
+            <span className="text-lg text-gray-400">
+              /year
+            </span>
           </p>
 
-          <p className="mt-4 text-gray-400">
+          <p className="mt-2 text-green-400 font-semibold">
             Save 2 Months
-            <br />
-            Unlimited AI Reports
-            <br />
-            Unlimited Startup Ideas
-            <br />
-            Premium Trend Analysis
           </p>
 
-         <button
-  onClick={() =>
-    window.location.href =
-      "https://checkout.dodopayments.com/buy/pdt_0NhBa6L4p8lBA35za31WC?quantity=1&redirect_url=https://spoteroo.com/dashboard"
-  }
-  className="mt-6 bg-green-600 px-6 py-3 rounded-lg"
->
-  Upgrade Yearly
-</button>
+          <ul className="mt-8 space-y-3 text-gray-300">
+            <li>✅ Unlimited AI Reports</li>
+            <li>✅ Unlimited Startup Ideas</li>
+            <li>✅ Premium Trend Analysis</li>
+            <li>✅ Priority Support</li>
+          </ul>
+
+          <button
+            onClick={() =>
+              startCheckout(
+                "yearly",
+                "https://checkout.dodopayments.com/buy/pdt_0NhBa6L4p8lBA35za31WC?quantity=1&redirect_url=https://spoteroo.com/dashboard"
+              )
+            }
+            disabled={loading !== null}
+            className="mt-8 w-full rounded-xl bg-green-600 hover:bg-green-700 py-3 font-semibold transition disabled:opacity-50"
+          >
+            {loading === "yearly"
+              ? "Redirecting..."
+              : "Upgrade Yearly"}
+          </button>
 
         </div>
 
