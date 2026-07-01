@@ -1,6 +1,10 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import {
+  canUseFeature,
+  incrementUsage,
+} from "@/lib/subscription";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,38 +13,25 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
-    console.log("========== PREMIUM REPORT API HIT ==========");
+    const {
+      id,
+      title,
+      description,
+      email,
+    } = await req.json();
 
-    const { id, title, description, email } = await req.json();
+    // Check free/pro limits
+    const allowed = await canUseFeature(
+      email,
+      "premium_reports",
+      2
+    );
 
-    console.log("Trend ID:", id);
-    console.log("Email:", email);
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("plan")
-      .eq("email", email)
-      .single();
-
-    if (profileError) {
-      console.error("PROFILE ERROR:", profileError);
-
+    if (!allowed) {
       return NextResponse.json(
         {
-          error: "Unable to verify subscription.",
-        },
-        {
-          status: 500,
-        }
-      );
-    }
-
-    console.log("PROFILE FOUND:", profile);
-
-    if (!profile || profile.plan !== "pro") {
-      return NextResponse.json(
-        {
-          error: "Pro subscription required.",
+          error:
+            "Free plan limit reached. Upgrade to Pro for unlimited Premium Reports.",
         },
         {
           status: 403,
@@ -49,10 +40,8 @@ export async function POST(req: Request) {
     }
 
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY!,
     });
-
-    console.log("Generating premium report...");
 
     const response = await openai.responses.create({
       model: "gpt-4.1-mini",
@@ -66,37 +55,29 @@ Create a detailed startup investment report.
 
 Include:
 
-1. Executive Summary
-2. SWOT Analysis
-3. TAM / SAM / SOM
-4. Competitor Analysis
-5. Revenue Models
-6. Go-To-Market Strategy
-7. Funding Potential
-8. Exit Opportunities
-9. Risks
-10. Overall Recommendation
+1. SWOT Analysis
+2. TAM SAM SOM
+3. Competitor Analysis
+4. Revenue Models
+5. Go To Market Strategy
+6. Funding Potential
+7. Exit Opportunities
 `,
     });
 
     const report = response.output_text;
 
-    console.log("Report generated.");
-    console.log("Length:", report?.length);
-
-    const { error: updateError } = await supabase
+    const { error } = await supabase
       .from("trends")
       .update({
         premium_report: report,
       })
       .eq("id", id);
 
-    if (updateError) {
-      console.error("UPDATE ERROR:", updateError);
-
+    if (error) {
       return NextResponse.json(
         {
-          error: "Failed to save report.",
+          error: error.message,
         },
         {
           status: 500,
@@ -104,18 +85,23 @@ Include:
       );
     }
 
-    console.log("Premium report saved successfully.");
+    // Track usage
+    await incrementUsage(
+      email,
+      "premium_reports"
+    );
 
     return NextResponse.json({
       success: true,
       report,
     });
+
   } catch (error) {
-    console.error("PREMIUM REPORT ERROR:", error);
+    console.error(error);
 
     return NextResponse.json(
       {
-        error: "Internal Server Error",
+        error: "Failed to generate premium report.",
       },
       {
         status: 500,

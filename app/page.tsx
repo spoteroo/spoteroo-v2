@@ -28,7 +28,7 @@ export default async function Home() {
               mb-6
             "
           >
-            Spot Tomorrow's
+            Spot Tomorrow&apos;s
             <br />
             Opportunities Today
           </h1>

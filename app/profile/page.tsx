@@ -1,23 +1,16 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function ProfilePage() {
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
+  const [plan, setPlan] = useState("free");
+  const [favorites, setFavorites] = useState(0);
 
-  const [plan, setPlan] =
-    useState("free");
-
-  const [favorites, setFavorites] =
-    useState(0);
-
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -26,41 +19,36 @@ export default function ProfilePage() {
 
     setEmail(user.email || "");
 
-    const { data: profile } =
-      await supabase
-        .from("profiles")
-        .select("plan")
-        .eq("email", user.email)
-        .single();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("email", user.email)
+      .single();
 
     if (profile) {
       setPlan(profile.plan);
     }
 
-    const { data: favs } =
-      await supabase
-        .from("favorites")
-        .select("*")
-        .eq(
-          "user_email",
-          user.email
-        );
+    const { data: favs } = await supabase
+      .from("favorites")
+      .select("*")
+      .eq("user_email", user.email);
 
-    setFavorites(
-      favs?.length || 0
-    );
-  }
+    setFavorites(favs?.length || 0);
+  }, []);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   return (
     <main className="min-h-screen text-white p-10">
       <div className="max-w-3xl mx-auto">
-
         <h1 className="text-5xl font-bold mb-10">
           My Profile
         </h1>
 
         <div className="glass p-8">
-
           <div className="mb-6">
             <p className="text-slate-400">
               Email
@@ -76,7 +64,7 @@ export default function ProfilePage() {
               Current Plan
             </p>
 
-            <p className="text-xl">
+            <p className="text-xl capitalize">
               {plan}
             </p>
           </div>
@@ -93,20 +81,14 @@ export default function ProfilePage() {
 
           {plan !== "pro" && (
             <button
-              onClick={() =>
-                window.location.href =
-                  "/pricing"
-              }
-              className="
-                bg-blue-600
-                px-6 py-3
-                rounded-xl
-              "
+              onClick={() => {
+                window.location.href = "/pricing";
+              }}
+              className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition"
             >
               Upgrade to Pro
             </button>
           )}
-
         </div>
       </div>
     </main>

@@ -1,6 +1,10 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import {
+  canUseFeature,
+  incrementUsage,
+} from "@/lib/subscription";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,15 +12,40 @@ const supabase = createClient(
 );
 
 export async function POST(req: Request) {
-  const { id, title, description } = await req.json();
+  try {
+    const {
+      id,
+      title,
+      description,
+      email,
+    } = await req.json();
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+    // Check free/pro limits
+    const allowed = await canUseFeature(
+      email,
+      "startup_ideas",
+      3
+    );
 
-  const response = await openai.responses.create({
-    model: "gpt-4.1-mini",
-    input: `
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "Free plan limit reached. Upgrade to Pro for unlimited Startup Ideas.",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const response = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: `
 Trend: ${title}
 
 Description:
@@ -36,48 +65,78 @@ COMPETITORS:
 RISKS:
 (main risks)
 `,
-  });
+    });
 
-  const output = response.output_text;
+    const output = response.output_text;
 
-  const startupIdea =
-    output
-      .split("MARKET_ANALYSIS:")[0]
-      .replace("STARTUP_IDEA:", "")
-      .trim();
+    const startupIdea =
+      output
+        .split("MARKET_ANALYSIS:")[0]
+        .replace("STARTUP_IDEA:", "")
+        .trim();
 
-  const marketAnalysis =
-    output
-      .split("MARKET_ANALYSIS:")[1]
-      ?.split("COMPETITORS:")[0]
-      ?.trim() || "";
+    const marketAnalysis =
+      output
+        .split("MARKET_ANALYSIS:")[1]
+        ?.split("COMPETITORS:")[0]
+        ?.trim() || "";
 
-  const competitors =
-    output
-      .split("COMPETITORS:")[1]
-      ?.split("RISKS:")[0]
-      ?.trim() || "";
+    const competitors =
+      output
+        .split("COMPETITORS:")[1]
+        ?.split("RISKS:")[0]
+        ?.trim() || "";
 
-  const risks =
-    output
-      .split("RISKS:")[1]
-      ?.trim() || "";
+    const risks =
+      output
+        .split("RISKS:")[1]
+        ?.trim() || "";
 
-  const { data, error } = await supabase
-    .from("trends")
-    .update({
-      startup_idea: startupIdea,
-      market_analysis: marketAnalysis,
-      competitors: competitors,
-      risks: risks,
-    })
-    .eq("id", id)
-    .select();
+    const { data, error } = await supabase
+      .from("trends")
+      .update({
+        startup_idea: startupIdea,
+        market_analysis: marketAnalysis,
+        competitors,
+        risks,
+      })
+      .eq("id", id)
+      .select();
 
-  console.log("UPDATE DATA:", data);
-  console.log("UPDATE ERROR:", error);
+    if (error) {
+      console.error(error);
 
-  return NextResponse.json({
-    result: startupIdea,
-  });
+      return NextResponse.json(
+        {
+          error: error.message,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    // Increment daily usage for free users
+    await incrementUsage(
+      email,
+      "startup_ideas"
+    );
+
+    return NextResponse.json({
+      success: true,
+      result: startupIdea,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        error: "Failed to generate startup idea.",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }

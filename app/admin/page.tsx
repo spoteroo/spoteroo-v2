@@ -3,11 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type GeneratedTrend = {
+  title: string;
+  description: string;
+  category: string;
+  score: number;
+  reason: string;
+};
+
 export default function AdminPage() {
   const router = useRouter();
 
   const [generatedTrends, setGeneratedTrends] =
-    useState<any[]>([]);
+    useState<GeneratedTrend[]>([]);
 
   useEffect(() => {
     const admin = localStorage.getItem("admin");
@@ -18,59 +26,53 @@ export default function AdminPage() {
   }, [router]);
 
   async function sendNewsletter() {
-    const response = await fetch(
-      "/api/send-newsletter",
-      {
+    try {
+      const response = await fetch("/api/send-newsletter", {
         method: "POST",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Newsletter sent!");
+      } else {
+        alert(result.error || "Failed to send newsletter");
       }
-    );
-
-    const result = await response.json();
-
-    if (result.success) {
-      alert("Newsletter sent!");
-    } else {
-      alert(result.error);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to send newsletter");
     }
   }
 
   async function generateTrends() {
     try {
-      const response = await fetch(
-        "/api/generate-trends",
-        {
-          method: "POST",
-        }
-      );
+      const response = await fetch("/api/generate-trends", {
+        method: "POST",
+      });
 
       const result = await response.json();
-
-      console.log(result);
 
       if (!result.success) {
         alert("Generation failed");
         return;
       }
 
-      const trends = result.trends || [];
+      const trends: GeneratedTrend[] =
+        result.trends ?? [];
 
-setGeneratedTrends([...trends]);
+      setGeneratedTrends(trends);
 
-await fetch("/api/save-trends", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ trends }),
-});
+      await fetch("/api/save-trends", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          trends,
+        }),
+      });
 
-alert(
-  `${trends.length} trends generated and saved`
-);
-
-      alert(
-        `Generated ${trends.length} trends successfully`
-      );
+      alert(`${trends.length} trends generated and saved.`);
     } catch (error) {
       console.error(error);
       alert("Generation failed");
@@ -85,7 +87,6 @@ alert(
   return (
     <main className="min-h-screen bg-black text-white p-10">
       <div className="max-w-5xl mx-auto">
-
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-5xl font-bold">
             Admin Dashboard
@@ -132,38 +133,35 @@ alert(
             </h2>
 
             <div className="space-y-4">
-              {generatedTrends.map(
-                (trend: any, index: number) => (
-                  <div
-                    key={index}
-                    className="bg-gray-900 p-5 rounded-xl"
-                  >
-                    <h3 className="text-xl font-bold">
-                      {trend.title}
-                    </h3>
+              {generatedTrends.map((trend, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-900 p-5 rounded-xl"
+                >
+                  <h3 className="text-xl font-bold">
+                    {trend.title}
+                  </h3>
 
-                    <p className="text-gray-300 mt-2">
-                      {trend.description}
-                    </p>
+                  <p className="text-gray-300 mt-2">
+                    {trend.description}
+                  </p>
 
-                    <p className="text-blue-400 mt-2">
-                      {trend.category}
-                    </p>
+                  <p className="text-blue-400 mt-2">
+                    Category: {trend.category}
+                  </p>
 
-                    <p className="text-green-400 mt-2">
-                      Score: {trend.score}
-                    </p>
+                  <p className="text-green-400 mt-2">
+                    Score: {trend.score}
+                  </p>
 
-                    <p className="text-gray-500 mt-2">
-                      {trend.reason}
-                    </p>
-                  </div>
-                )
-              )}
+                  <p className="text-gray-500 mt-2">
+                    {trend.reason}
+                  </p>
+                </div>
+              ))}
             </div>
           </>
         )}
-
       </div>
     </main>
   );

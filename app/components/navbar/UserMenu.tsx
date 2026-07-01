@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase";
 import Link from "next/link";
+import { supabase } from "../../../lib/supabase";
+import type { User } from "@supabase/supabase-js";
 
 export default function UserMenu() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     async function getUser() {
@@ -39,9 +40,9 @@ export default function UserMenu() {
 
   return (
     <div className="flex items-center gap-4">
-     <span className="text-sm text-slate-300 cursor-pointer">
-  Account ▼
-</span>
+      <span className="text-sm text-slate-300 cursor-pointer">
+        Account ▼
+      </span>
 
       <button
         onClick={async () => {

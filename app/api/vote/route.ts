@@ -8,8 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { trendId, voteType } =
-      await request.json();
+    const { trendId, voteType } = await request.json();
 
     const { error } = await supabase
       .from("votes")
@@ -20,21 +19,27 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
+        {
+          error: error.message,
+        },
+        {
+          status: 500,
+        }
       );
     }
 
     return NextResponse.json({
       success: true,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
         error: "Failed to vote",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

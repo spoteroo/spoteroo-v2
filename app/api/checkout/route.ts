@@ -34,8 +34,14 @@ export async function POST(request: Request) {
 
     console.log("Plan:", plan);
     console.log("Email:", email);
-    console.log("Environment:", process.env.DODO_PAYMENTS_ENVIRONMENT);
-    console.log("API Key Exists:", !!process.env.DODO_PAYMENTS_API_KEY);
+    console.log(
+      "Environment:",
+      process.env.DODO_PAYMENTS_ENVIRONMENT
+    );
+    console.log(
+      "API Key Exists:",
+      !!process.env.DODO_PAYMENTS_API_KEY
+    );
     console.log(
       "API Key Prefix:",
       process.env.DODO_PAYMENTS_API_KEY?.substring(0, 8)
@@ -61,32 +67,48 @@ export async function POST(request: Request) {
     return NextResponse.json({
       checkout_url: session.checkout_url,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("========== DODO ERROR ==========");
     console.error(error);
 
-    if (error?.message) {
+    let message = "Checkout failed";
+
+    if (error instanceof Error) {
+      message = error.message;
       console.error("Message:", error.message);
     }
 
-    if (error?.status) {
-      console.error("Status:", error.status);
-    }
+    if (
+      typeof error === "object" &&
+      error !== null
+    ) {
+      if ("status" in error) {
+        console.error(
+          "Status:",
+          (error as { status: unknown }).status
+        );
+      }
 
-    if (error?.response) {
-      console.error("Response:", error.response);
-    }
+      if ("response" in error) {
+        console.error(
+          "Response:",
+          (error as { response: unknown }).response
+        );
+      }
 
-    if (error?.body) {
-      console.error("Body:", error.body);
+      if ("body" in error) {
+        console.error(
+          "Body:",
+          (error as { body: unknown }).body
+        );
+      }
     }
 
     console.error("=================================");
 
     return NextResponse.json(
       {
-        error: error?.message || "Checkout failed",
-        details: error,
+        error: message,
       },
       {
         status: 500,

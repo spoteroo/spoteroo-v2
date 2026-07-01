@@ -23,7 +23,11 @@ type Trend = {
 
 export default function DashboardPage() {
   const router = useRouter();
-
+const [usage, setUsage] = useState<{
+  plan: string;
+  startupIdeasRemaining: number | string;
+  premiumReportsRemaining: number | string;
+} | null>(null);
   const [checkingAuth, setCheckingAuth] =
     useState(true);
 
@@ -48,6 +52,8 @@ export default function DashboardPage() {
   const [proUsers, setProUsers] =
   useState(0);
 
+  const [aiUsageToday, setAiUsageToday] = useState(0);
+
     const [categoryData, setCategoryData] =
   useState<
     {
@@ -60,8 +66,10 @@ export default function DashboardPage() {
     useState<Trend[]>([]);
 
   useEffect(() => {
-    async function loadDashboard() {
-      const {
+  async function loadDashboard() {
+    try {
+
+ const {
         data: { user },
       } = await supabase.auth.getUser();
 
@@ -71,6 +79,23 @@ export default function DashboardPage() {
       }
 
       setCheckingAuth(false);
+
+      const usageResponse = await fetch("/api/usage", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    email: user.email,
+  }),
+});
+
+if (usageResponse.ok) {
+  const usageData = await usageResponse.json();
+  setUsage(usageData);
+}
+
+     
 
       // Trends
       const {
@@ -189,9 +214,29 @@ if (profiles) {
 
   setProUsers(proCount);
 }
-    }
+const today = new Date().toISOString().split("T")[0];
+
+const { data: usageRows } = await supabase
+  .from("ai_usage")
+  .select("*")
+  .eq("usage_date", today);
+
+if (usageRows) {
+  const total = usageRows.reduce(
+    (sum, item) => sum + item.count,
+    0
+  );
+
+  setAiUsageToday(total);
+}
+
+} catch (error) {
+  console.error(error);
+}
+}
 
     loadDashboard();
+    
   }, [router]);
 
   if (checkingAuth) {
@@ -216,6 +261,36 @@ if (profiles) {
         <h1 className="text-5xl font-bold mb-10">
           Dashboard
         </h1>
+        {usage && (
+  <div className="glass p-6 mb-8">
+    <h2 className="text-2xl font-bold mb-4">
+      Your AI Plan
+    </h2>
+
+    <p>
+      <strong>Plan:</strong> {usage.plan}
+    </p>
+
+    <p>
+      <strong>Startup Ideas Remaining:</strong>{" "}
+      {usage.startupIdeasRemaining}
+    </p>
+
+    <p>
+      <strong>Premium Reports Remaining:</strong>{" "}
+      {usage.premiumReportsRemaining}
+    </p>
+
+    {usage.plan !== "pro" && (
+      <Link
+        href="/pricing"
+        className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl"
+      >
+        Upgrade to Pro
+      </Link>
+    )}
+  </div>
+)}
 
         {/* ACTION BUTTONS */}
 
@@ -347,7 +422,7 @@ if (profiles) {
               {votes}
             </p>
           </div>
-          <div className="glass p-6">
+         <div className="glass p-6">
   <h2 className="text-slate-400 text-sm">
     Pro Users
   </h2>
@@ -356,7 +431,18 @@ if (profiles) {
     {proUsers}
   </p>
 </div>
-        </div>
+
+<div className="glass p-6">
+  <h2 className="text-slate-400 text-sm">
+    Today&apos;s AI Calls
+  </h2>
+
+  <p className="text-5xl font-bold mt-4">
+    {aiUsageToday}
+  </p>
+</div>
+
+</div>
 
         {/* TOP TREND */}
 
@@ -403,7 +489,45 @@ if (profiles) {
     </BarChart>
   </div>
 </div>
+<div className="glass p-8 mb-10">
 
+  <h2 className="text-3xl font-bold mb-6">
+    AI Usage
+  </h2>
+
+  <div className="space-y-4">
+
+    <div className="flex justify-between">
+
+      <span>Today&#39;s AI Calls</span>
+
+      <span className="font-bold">
+        {aiUsageToday}
+      </span>
+
+    </div>
+
+    <div className="w-full bg-slate-700 rounded-full h-3">
+
+      <div
+        className="bg-blue-500 h-3 rounded-full"
+        style={{
+          width: `${Math.min(
+            aiUsageToday,
+            100
+          )}%`,
+        }}
+      />
+
+    </div>
+
+    <p className="text-slate-400 text-sm">
+      Tracks every AI report and startup idea generated today.
+    </p>
+
+  </div>
+
+</div>
         {/* ALL TRENDS */}
 
         <h2 className="text-3xl font-bold mb-6">
