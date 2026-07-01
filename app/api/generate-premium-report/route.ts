@@ -7,42 +7,56 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-console.log("PREMIUM REPORT API HIT");
-
 export async function POST(req: Request) {
-  const {
-    id,
-    title,
-    description,
-    email,
-  } = await req.json();
+  try {
+    console.log("========== PREMIUM REPORT API HIT ==========");
 
-  console.log("EMAIL RECEIVED:", email);
+    const { id, title, description, email } = await req.json();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("plan")
-    .eq("email", email)
-    .single();
+    console.log("Trend ID:", id);
+    console.log("Email:", email);
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("email", email)
+      .single();
+
+    if (profileError) {
+      console.error("PROFILE ERROR:", profileError);
+
+      return NextResponse.json(
+        {
+          error: "Unable to verify subscription.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
 
     console.log("PROFILE FOUND:", profile);
 
-  if (!profile || profile.plan !== "pro") {
-    return NextResponse.json(
-      { error: "Pro required" },
-      { status: 403 }
-    );
-  }
+    if (!profile || profile.plan !== "pro") {
+      return NextResponse.json(
+        {
+          error: "Pro subscription required.",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
-  console.log("CALLING OPENAI...");
+    console.log("Generating premium report...");
 
-  const response = await openai.responses.create({
-  model: "gpt-4.1-mini",
-  input: `
+    const response = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: `
 Trend: ${title}
 
 Description:
@@ -52,34 +66,60 @@ Create a detailed startup investment report.
 
 Include:
 
-1. SWOT Analysis
-2. TAM SAM SOM
-3. Competitor Analysis
-4. Revenue Models
-5. Go To Market Strategy
-6. Funding Potential
-7. Exit Opportunities
+1. Executive Summary
+2. SWOT Analysis
+3. TAM / SAM / SOM
+4. Competitor Analysis
+5. Revenue Models
+6. Go-To-Market Strategy
+7. Funding Potential
+8. Exit Opportunities
+9. Risks
+10. Overall Recommendation
 `,
-});
+    });
 
-const report = response.output_text;
+    const report = response.output_text;
 
-console.log("REPORT LENGTH:", report?.length);
-console.log("REPORT PREVIEW:", report?.slice(0, 200));
+    console.log("Report generated.");
+    console.log("Length:", report?.length);
 
-console.log("SAVING REPORT...");
+    const { error: updateError } = await supabase
+      .from("trends")
+      .update({
+        premium_report: report,
+      })
+      .eq("id", id);
 
-const { error } = await supabase
-  .from("trends")
-  .update({
-    premium_report: report,
-  })
-  .eq("id", id);
+    if (updateError) {
+      console.error("UPDATE ERROR:", updateError);
 
-console.log("UPDATE ERROR:", error);
+      return NextResponse.json(
+        {
+          error: "Failed to save report.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
 
-return NextResponse.json({
-  success: true,
-  reportLength: report?.length,
-});
+    console.log("Premium report saved successfully.");
+
+    return NextResponse.json({
+      success: true,
+      report,
+    });
+  } catch (error) {
+    console.error("PREMIUM REPORT ERROR:", error);
+
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }
