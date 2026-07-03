@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       email,
     } = await req.json();
 
-    // Check free/pro limits
+    // Check usage limits
     const allowed = await canUseFeature(
       email,
       "startup_ideas",
@@ -35,6 +35,17 @@ export async function POST(req: Request) {
         },
         {
           status: 403,
+        }
+      );
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        {
+          error: "OpenAI API key is missing.",
+        },
+        {
+          status: 500,
         }
       );
     }
@@ -67,13 +78,12 @@ RISKS:
 `,
     });
 
-    const output = response.output_text;
+    const output = response.output_text ?? "";
 
-    const startupIdea =
-      output
-        .split("MARKET_ANALYSIS:")[0]
-        .replace("STARTUP_IDEA:", "")
-        .trim();
+    const startupIdea = output
+      .split("MARKET_ANALYSIS:")[0]
+      .replace("STARTUP_IDEA:", "")
+      .trim();
 
     const marketAnalysis =
       output
@@ -92,7 +102,7 @@ RISKS:
         .split("RISKS:")[1]
         ?.trim() || "";
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("trends")
       .update({
         startup_idea: startupIdea,
@@ -100,8 +110,7 @@ RISKS:
         competitors,
         risks,
       })
-      .eq("id", id)
-      .select();
+      .eq("id", id);
 
     if (error) {
       console.error(error);
@@ -116,7 +125,7 @@ RISKS:
       );
     }
 
-    // Increment daily usage for free users
+    // Record usage
     await incrementUsage(
       email,
       "startup_ideas"

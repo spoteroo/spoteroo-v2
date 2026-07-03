@@ -1,100 +1,99 @@
+"use client";
+
+import Link from "next/link";
+
 export default function AboutPage() {
   return (
-    <main className="min-h-screen text-white p-10">
-      <div className="max-w-4xl mx-auto">
-        <div className="glass p-10">
-          <h1
-            className="
-              text-6xl
-              font-bold
-              mb-6
-              bg-gradient-to-r
-              from-white
-              to-cyan-400
-              bg-clip-text
-              text-transparent
-            "
-          >
+    <main className="min-h-screen text-white">
+      <div className="max-w-7xl mx-auto px-6 py-20">
+
+        <section className="text-center mb-20">
+
+          <h1 className="text-6xl font-bold mb-6">
             About Spoteroo
           </h1>
 
-          <p className="text-xl text-slate-300 mb-8">
-            Spot emerging startup opportunities
-            before they become obvious.
+          <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+            Spoteroo is an AI-powered opportunity intelligence
+            platform helping founders, investors and builders
+            discover emerging startup opportunities before they
+            become mainstream.
           </p>
 
-          <div className="space-y-6 text-slate-300 leading-8">
-            <p>
-              Spoteroo helps founders,
-              investors, builders, and
-              innovators discover high-potential
-              trends before they reach the
-              mainstream.
-            </p>
+        </section>
 
-            <p>
-              We combine trend discovery,
-              startup opportunity analysis,
-              market insights, and community
-              submissions to identify where the
-              next wave of opportunities is
-              forming.
-            </p>
+        <section className="glass p-10 rounded-3xl mb-20">
 
-            <p>
-              Every trend includes scoring,
-              market context, startup ideas,
-              competitor analysis, and risk
-              assessments to help you make
-              informed decisions faster.
-            </p>
+          <h2 className="text-4xl font-bold mb-6">
+            Our Mission
+          </h2>
 
-            <p>
-              Whether you're launching a startup,
-              validating an idea, or exploring
-              future markets, Spoteroo helps you
-              stay ahead of the curve.
+          <p className="text-slate-400 leading-8">
+            We believe the biggest startup opportunities appear
+            long before everyone notices them.
+            Spoteroo uses AI to identify future market trends,
+            validate opportunities and generate startup ideas.
+          </p>
+
+        </section>
+
+        <section className="grid md:grid-cols-3 gap-8 mb-20">
+
+          <div className="glass p-8 rounded-2xl">
+            <h3 className="text-2xl font-bold mb-4">
+              Discover
+            </h3>
+
+            <p className="text-slate-400">
+              Discover emerging industries,
+              technologies and startup ideas.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 mt-10">
-            <div className="glass p-6">
-              <h3 className="text-2xl font-bold text-blue-400">
-                Discover
-              </h3>
+          <div className="glass p-8 rounded-2xl">
+            <h3 className="text-2xl font-bold mb-4">
+              Analyze
+            </h3>
 
-              <p className="text-slate-400 mt-2">
-                Find emerging trends across
-                industries before they become
-                crowded.
-              </p>
-            </div>
-
-            <div className="glass p-6">
-              <h3 className="text-2xl font-bold text-green-400">
-                Analyze
-              </h3>
-
-              <p className="text-slate-400 mt-2">
-                Explore startup opportunities,
-                competitors, and market
-                potential.
-              </p>
-            </div>
-
-            <div className="glass p-6">
-              <h3 className="text-2xl font-bold text-purple-400">
-                Build
-              </h3>
-
-              <p className="text-slate-400 mt-2">
-                Turn trends into products,
-                startups, and long-term
-                businesses.
-              </p>
-            </div>
+            <p className="text-slate-400">
+              AI-powered market research,
+              competitors and opportunity scores.
+            </p>
           </div>
-        </div>
+
+          <div className="glass p-8 rounded-2xl">
+            <h3 className="text-2xl font-bold mb-4">
+              Build
+            </h3>
+
+            <p className="text-slate-400">
+              Turn opportunities into
+              successful startups.
+            </p>
+          </div>
+
+        </section>
+
+        <section className="glass p-12 rounded-3xl text-center">
+
+          <h2 className="text-5xl font-bold mb-6">
+            Ready to Discover Tomorrow?
+          </h2>
+
+          <p className="text-slate-400 mb-8">
+            Join Spoteroo and stay ahead
+            of emerging markets.
+          </p>
+
+          <Link
+            href="/trends"
+            className="inline-block bg-blue-600 hover:bg-blue-700 transition px-8 py-4 rounded-xl font-semibold"
+          >
+            Explore Trends →
+          </Link>
+
+        </section>
+
       </div>
     </main>
   );

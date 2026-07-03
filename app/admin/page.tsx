@@ -17,6 +17,15 @@ export default function AdminPage() {
   const [generatedTrends, setGeneratedTrends] =
     useState<GeneratedTrend[]>([]);
 
+    const categories = [
+  "All",
+  ...new Set(
+    generatedTrends.map(
+      (trend) => trend.category
+    )
+  ),
+];
+
   useEffect(() => {
     const admin = localStorage.getItem("admin");
 
@@ -92,6 +101,7 @@ export default function AdminPage() {
             Admin Dashboard
           </h1>
 
+
           <button
             onClick={logout}
             className="bg-red-600 px-4 py-2 rounded"
@@ -100,23 +110,67 @@ export default function AdminPage() {
           </button>
         </div>
 
-        <div className="flex gap-4 mb-8">
+        <div className="flex flex-wrap gap-4 mb-8">
           <button
             onClick={sendNewsletter}
-            className="bg-green-600 px-6 py-3 rounded"
+            className="glass px-6 py-3 rounded-xl hover:border hover:border-green-500 transition"
           >
             Send Newsletter
           </button>
 
           <button
             onClick={generateTrends}
-            className="bg-blue-600 px-6 py-3 rounded"
+            className="glass px-6 py-3 rounded-xl hover:border hover:border-blue-500 transition"
           >
-            Generate AI Trends
+Generate AI Trends
           </button>
         </div>
 
-        <div className="bg-gray-900 p-6 rounded-xl mb-8">
+       <div className="grid md:grid-cols-4 gap-6 mb-8">
+
+  <div className="glass p-6 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Generated Trends
+    </p>
+
+    <h3 className="text-4xl font-bold mt-2">
+      {generatedTrends.length}
+    </h3>
+  </div>
+
+  <div className="glass p-6 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Categories
+    </p>
+
+    <h3 className="text-4xl font-bold mt-2">
+      {generatedTrends.length}
+    </h3>
+  </div>
+
+  <div className="glass p-6 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Selected
+    </p>
+
+    <h3 className="text-4xl font-bold mt-2">
+      0
+    </h3>
+  </div>
+
+  <div className="glass p-6 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Categories
+    </p>
+
+    <h3 className="text-4xl font-bold mt-2">
+      {categories.length - 1}
+    </h3>
+  </div>
+
+</div>
+       
+      <div className="glass p-6 rounded-2xl mb-8">
           <h2 className="text-2xl font-bold mb-4">
             Spoteroo Admin
           </h2>
@@ -133,6 +187,7 @@ export default function AdminPage() {
             </h2>
 
             <div className="space-y-4">
+
               {generatedTrends.map((trend, index) => (
                 <div
                   key={index}

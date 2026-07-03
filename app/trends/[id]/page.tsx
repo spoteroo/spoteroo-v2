@@ -290,21 +290,62 @@ const generatePremiumReport = async () => {
   "
 >
   Save Trend
+  
 </button>
 
               <button
-                onClick={downloadPDF}
-                className="
-                  bg-purple-600
-                  px-4 py-2
-                  rounded-xl
-                  shadow-[0_0_20px_rgba(168,85,247,0.35)]
-                "
-              >
-                Download Report
-              </button>
+  onClick={downloadPDF}
+  className="
+    bg-purple-600
+    px-4 py-2
+    rounded-xl
+    shadow-[0_0_20px_rgba(168,85,247,0.35)]
+  "
+>
+  Download PDF
+</button>
 
-              {isPro && (
+<button
+  className="
+    bg-blue-600
+    px-4 py-2
+    rounded-xl
+  "
+>
+  Share
+</button>
+
+<button
+  className="
+    bg-slate-700
+    px-4 py-2
+    rounded-xl
+  "
+>
+  Copy Link
+</button>
+
+<button
+  className="
+    bg-green-600
+    px-4 py-2
+    rounded-xl
+  "
+>
+  Print
+</button>
+
+<button
+  className="
+    bg-yellow-600
+    px-4 py-2
+    rounded-xl
+  "
+>
+  ⭐ Bookmark
+</button>
+
+{isPro && (
   <button
     onClick={generatePremiumReport}
     className="
@@ -516,8 +557,9 @@ const generatePremiumReport = async () => {
       <h2 className="text-2xl font-bold mb-4">
         Risks
       </h2>
-
+      
             <p>{trend.risks}</p>
+            
     </div>
   </>
 )}
@@ -525,5 +567,6 @@ const generatePremiumReport = async () => {
         </div>
       </div>
     </main>
+   
   );
 }

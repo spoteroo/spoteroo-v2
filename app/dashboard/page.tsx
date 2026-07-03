@@ -3,15 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase";
-  import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
 
+import { supabase } from "@/lib/supabase";
+
+import DashboardHeader from "./components/DashboardHeader";
+import BusinessMetrics from "./components/BusinessMetrics";
+import RevenueChart from "./components/RevenueChart";
+import UserChart from "./components/UserChart";
+import AIUsageCard from "./components/AIUsageCard";
+import TopTrendCard from "./components/TopTrendCard";
+import SearchBar from "./components/SearchBar";
+import CategoryFilter from "./components/CategoryFilter";
+import Pagination from "./components/Pagination";
+import TrendTable from "./components/TrendTable";
 
 type Trend = {
   id: number;
@@ -19,613 +23,364 @@ type Trend = {
   description: string;
   category: string;
   score: number;
+  reason: string | null;
 };
+
+type Usage = {
+  plan: string;
+  startupIdeasRemaining: number;
+  premiumReportsRemaining: number;
+};
+
+const ITEMS_PER_PAGE = 10;
 
 export default function DashboardPage() {
   const router = useRouter();
-const [usage, setUsage] = useState<{
-  plan: string;
-  startupIdeasRemaining: number | string;
-  premiumReportsRemaining: number | string;
-} | null>(null);
-  const [checkingAuth, setCheckingAuth] =
-    useState(true);
 
-  const [totalTrends, setTotalTrends] =
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const [usage, setUsage] = useState<Usage | null>(null);
+
+  const [trendsList, setTrendsList] = useState<Trend[]>([]);
+
+  const [search, setSearch] = useState("");
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("All");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
+  const [revenue, setRevenue] =
     useState(0);
 
-  const [avgScore, setAvgScore] =
+  const [mrr, setMrr] =
     useState(0);
 
-  const [categories, setCategories] =
+  const [freeUsers, setFreeUsers] =
     useState(0);
-
-  const [subscribers, setSubscribers] =
-    useState(0);
-
-  const [favorites, setFavorites] =
-    useState(0);
-
-    const [votes, setVotes] =
-  useState(0);
 
   const [proUsers, setProUsers] =
-  useState(0);
+    useState(0);
 
-  const [aiUsageToday, setAiUsageToday] = useState(0);
+  const [conversionRate, setConversionRate] =
+    useState(0);
 
-    const [categoryData, setCategoryData] =
-  useState<
-    {
-      name: string;
-      value: number;
-    }[]
-  >([]);
-  
-  const [trendsList, setTrendsList] =
-    useState<Trend[]>([]);
+  const [aiUsageToday, setAiUsageToday] =
+    useState(0);
+
+  const [revenueChartData, setRevenueChartData] =
+    useState<
+      {
+        name: string;
+        revenue: number;
+      }[]
+    >([]);
+
+  const [userChartData, setUserChartData] =
+    useState<
+      {
+        name: string;
+        users: number;
+      }[]
+    >([]);
 
   useEffect(() => {
-  async function loadDashboard() {
-    try {
-
- const {
+    async function loadDashboard() {
+      const {
         data: { user },
       } = await supabase.auth.getUser();
 
       if (!user) {
-        router.replace("/login");
+        router.push("/login");
         return;
       }
 
       setCheckingAuth(false);
 
-      const usageResponse = await fetch("/api/usage", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    email: user.email,
-  }),
-});
+      const usageResponse = await fetch("/api/usage");
 
-if (usageResponse.ok) {
-  const usageData = await usageResponse.json();
-  setUsage(usageData);
-}
-
-     
-
-      // Trends
-      const {
-        data: trends,
-        error: trendsError,
-      } = await supabase
-        .from("trends")
-        .select("*");
-
-      if (trendsError) {
-        console.error(
-          "Failed to load trends:",
-          trendsError
-        );
+      if (usageResponse.ok) {
+        setUsage(await usageResponse.json());
       }
+
+      const { data: trends } =
+        await supabase
+          .from("trends")
+          .select("*")
+          .order("score", {
+            ascending: false,
+          });
 
       if (trends) {
         setTrendsList(trends);
+      }
 
-        setTotalTrends(trends.length);
+      const { data: profiles } =
+        await supabase
+          .from("profiles")
+          .select("plan");
 
-        const avg =
-          trends.length > 0
-            ? trends.reduce(
-                (sum, trend) =>
-                  sum + trend.score,
-                0
-              ) / trends.length
-            : 0;
+      if (profiles) {
+        const pro =
+          profiles.filter(
+            (p) => p.plan === "pro"
+          ).length;
 
-        setAvgScore(Math.round(avg));
+        const free =
+          profiles.length - pro;
 
-        const uniqueCategories =
-          new Set(
-            trends.map(
-              (trend) => trend.category
-            )
+        setProUsers(pro);
+        setFreeUsers(free);
+
+        const monthlyRevenue =
+          pro * 49;
+
+        setRevenue(monthlyRevenue);
+        setMrr(monthlyRevenue);
+
+        setConversionRate(
+          profiles.length === 0
+            ? 0
+            : Math.round(
+                (pro / profiles.length) *
+                  100
+              )
+        );
+
+        setRevenueChartData([
+          {
+            name: "Current",
+            revenue: monthlyRevenue,
+          },
+        ]);
+
+        setUserChartData([
+          {
+            name: "Free",
+            users: free,
+          },
+          {
+            name: "Pro",
+            users: pro,
+          },
+        ]);
+      }
+
+      const today =
+        new Date()
+          .toISOString()
+          .split("T")[0];
+
+      const { data: usageRows } =
+        await supabase
+          .from("ai_usage")
+          .select("*")
+          .eq(
+            "usage_date",
+            today
           );
 
-        setCategories(
-          uniqueCategories.size
-        );
-
-        const counts: Record<
-  string,
-  number
-> = {};
-
-trends.forEach((trend) => {
-  counts[trend.category] =
-    (counts[trend.category] || 0) + 1;
-});
-
-setCategoryData(
-  Object.entries(counts).map(
-    ([name, value]) => ({
-      name,
-      value,
-    })
-  )
-);
-      }
-
-      // Subscribers
-      const {
-  count: subscribersCount,
-} = await supabase
-  .from("newsletter_subscribers")
-  .select("*", {
-    count: "exact",
-    head: true,
-  });
-
-setSubscribers(
-  subscribersCount || 0
-);
-
-
-      // Favorites
-      const {
-        data: favoriteData,
-      } = await supabase
-        .from("favorites")
-        .select("*");
-
-      if (favoriteData) {
-        setFavorites(
-          favoriteData.length
+      if (usageRows) {
+        setAiUsageToday(
+          usageRows.reduce(
+            (sum, row) =>
+              sum + row.count,
+            0
+          )
         );
       }
-
-      // Votes
-      const {
-        data: voteData,
-      } = await supabase
-        .from("votes")
-        .select("*");
-
-      if (voteData) {
-        setVotes(
-          voteData.length
-        );
-      }
-
-      const {
-  data: profiles,
-} = await supabase
-  .from("profiles")
-  .select("plan");
-
-if (profiles) {
-  const proCount =
-    profiles.filter(
-      (p) => p.plan === "pro"
-    ).length;
-
-  setProUsers(proCount);
-}
-const today = new Date().toISOString().split("T")[0];
-
-const { data: usageRows } = await supabase
-  .from("ai_usage")
-  .select("*")
-  .eq("usage_date", today);
-
-if (usageRows) {
-  const total = usageRows.reduce(
-    (sum, item) => sum + item.count,
-    0
-  );
-
-  setAiUsageToday(total);
-}
-
-} catch (error) {
-  console.error(error);
-}
-}
+    }
 
     loadDashboard();
-    
   }, [router]);
 
-  if (checkingAuth) {
+    if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
-        Loading...
+        Loading Dashboard...
       </div>
     );
   }
 
+  const categories = [
+    "All",
+    ...new Set(trendsList.map((trend) => trend.category)),
+  ];
+
+  const filteredTrends = trendsList.filter((trend) => {
+    const matchesSearch =
+      trend.title
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      trend.description
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "All" ||
+      trend.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredTrends.length / ITEMS_PER_PAGE)
+  );
+
+  const paginatedTrends = filteredTrends.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   const topTrend =
-    trendsList.length > 0
-      ? [...trendsList].sort(
-          (a, b) =>
-            b.score - a.score
-        )[0]
-      : null;
+    trendsList.length > 0 ? trendsList[0] : null;
 
   return (
-    <main className="min-h-screen text-white p-10">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-bold mb-10">
-          Dashboard
-        </h1>
+    <main className="min-h-screen bg-black text-white p-10">
+      <div className="max-w-7xl mx-auto">
+
+        <DashboardHeader
+  onDiscover={async () => {
+    await fetch("/api/discover-trends", {
+      method: "POST",
+    });
+
+    window.location.reload();
+  }}
+  onNewsletter={async () => {
+    await fetch("/api/send-newsletter", {
+      method: "POST",
+    });
+
+    alert("Newsletter Sent");
+  }}
+/>
         {usage && (
-  <div className="glass p-6 mb-8">
-    <h2 className="text-2xl font-bold mb-4">
-      Your AI Plan
-    </h2>
-
-    <p>
-      <strong>Plan:</strong> {usage.plan}
-    </p>
-
-    <p>
-      <strong>Startup Ideas Remaining:</strong>{" "}
-      {usage.startupIdeasRemaining}
-    </p>
-
-    <p>
-      <strong>Premium Reports Remaining:</strong>{" "}
-      {usage.premiumReportsRemaining}
-    </p>
-
-    {usage.plan !== "pro" && (
-      <Link
-        href="/pricing"
-        className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl"
-      >
-        Upgrade to Pro
-      </Link>
-    )}
-  </div>
-)}
-
-        {/* ACTION BUTTONS */}
-
-        <div className="flex gap-4 mb-10 flex-wrap">
-          <button
-            onClick={async () => {
-              const res =
-                await fetch(
-                  "/api/discover-trends",
-                  {
-                    method: "POST",
-                  }
-                );
-
-              const data =
-                await res.json();
-
-              alert(
-                `${data.inserted || 0} trends added`
-              );
-
-              window.location.reload();
-            }}
-            className="
-              bg-blue-600
-              px-6 py-3
-              rounded-xl
-              shadow-[0_0_20px_rgba(59,130,246,0.4)]
-            "
-          >
-            Discover New Trends
-          </button>
-
-          <button
-            onClick={async () => {
-              const res =
-                await fetch(
-                  "/api/send-newsletter",
-                  {
-                    method: "POST",
-                  }
-                );
-
-              const data =
-                await res.json();
-
-              if (!res.ok) {
-                alert(
-                  data.error ||
-                    "Failed to send newsletter"
-                );
-                return;
-              }
-
-              alert(
-                "Newsletter sent!"
-              );
-            }}
-            className="
-              bg-green-600
-              px-6 py-3
-              rounded-xl
-              shadow-[0_0_20px_rgba(34,197,94,0.4)]
-            "
-          >
-            Send Newsletter
-          </button>
-        </div>
-
-        {/* STATS */}
-
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-6 mb-10">
-          <div className="glass p-6">
-            <h2 className="text-slate-400 text-sm">
-              Total Trends
+          <div className="glass p-6 rounded-2xl mb-8">
+            <h2 className="text-2xl font-bold mb-4">
+              Your AI Plan
             </h2>
 
-            <p className="text-5xl font-bold mt-4">
-              {totalTrends}
-            </p>
-          </div>
-
-          <div className="glass p-6">
-            <h2 className="text-slate-400 text-sm">
-              Avg Score
-            </h2>
-
-            <p className="text-5xl font-bold mt-4">
-              {avgScore}
-            </p>
-          </div>
-
-          <div className="glass p-6">
-            <h2 className="text-slate-400 text-sm">
-              Categories
-            </h2>
-
-            <p className="text-5xl font-bold mt-4">
-              {categories}
-            </p>
-          </div>
-
-          <div className="glass p-6">
-            <h2 className="text-slate-400 text-sm">
-              Subscribers
-            </h2>
-
-            <p className="text-5xl font-bold mt-4">
-              {subscribers}
-            </p>
-          </div>
-
-          <div className="glass p-6">
-            <h2 className="text-slate-400 text-sm">
-              Favorites
-            </h2>
-
-            <p className="text-5xl font-bold mt-4">
-              {favorites}
-            </p>
-          </div>
-
-          <div className="glass p-6">
-            <h2 className="text-slate-400 text-sm">
-              Votes
-            </h2>
-
-            <p className="text-5xl font-bold mt-4">
-              {votes}
-            </p>
-          </div>
-         <div className="glass p-6">
-  <h2 className="text-slate-400 text-sm">
-    Pro Users
-  </h2>
-
-  <p className="text-5xl font-bold mt-4">
-    {proUsers}
-  </p>
-</div>
-
-<div className="glass p-6">
-  <h2 className="text-slate-400 text-sm">
-    Today&apos;s AI Calls
-  </h2>
-
-  <p className="text-5xl font-bold mt-4">
-    {aiUsageToday}
-  </p>
-</div>
-
-</div>
-
-        {/* TOP TREND */}
-
-        {topTrend && (
-          <div className="glass p-8 mb-10 border border-yellow-500/30">
-            <h2 className="text-3xl font-bold text-yellow-400">
-              🏆 Top Trend
-            </h2>
-
-            <p className="text-2xl font-bold mt-3">
-              {topTrend.title}
+            <p>
+              <strong>Plan:</strong> {usage.plan}
             </p>
 
-            <p className="text-slate-400 mt-2">
-              Score: {topTrend.score}
+            <p>
+              <strong>Startup Ideas Remaining:</strong>{" "}
+              {usage.startupIdeasRemaining}
             </p>
+
+            <p>
+              <strong>Premium Reports Remaining:</strong>{" "}
+              {usage.premiumReportsRemaining}
+            </p>
+
+            {usage.plan !== "pro" && (
+              <Link
+                href="/pricing"
+                className="inline-block mt-5 bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl"
+              >
+                Upgrade to Pro
+              </Link>
+            )}
           </div>
         )}
 
-        <div className="glass p-8 mb-10">
-  <h2 className="text-3xl font-bold mb-6">
-    Trends by Category
-  </h2>
+        <BusinessMetrics
+          revenue={revenue}
+          mrr={mrr}
+          proUsers={proUsers}
+          freeUsers={freeUsers}
+          conversionRate={conversionRate}
+        />
 
-  <div
-    style={{
-      width: "100%",
-      height: 400,
-      minWidth: 300,
-    }}
-  >
-    <BarChart
-      width={800}
-      height={400}
-      data={categoryData}
-    >
-      <XAxis dataKey="name" />
-      <YAxis />
-      <Tooltip />
-      <Bar
-        dataKey="value"
-        fill="#3b82f6"
-      />
-    </BarChart>
-  </div>
-</div>
-<div className="glass p-8 mb-10">
+        <div className="grid lg:grid-cols-2 gap-8 mb-10">
 
-  <h2 className="text-3xl font-bold mb-6">
-    AI Usage
-  </h2>
+          <RevenueChart
+            data={revenueChartData}
+          />
 
-  <div className="space-y-4">
+          <UserChart
+            data={userChartData}
+          />
 
-    <div className="flex justify-between">
-
-      <span>Today&#39;s AI Calls</span>
-
-      <span className="font-bold">
-        {aiUsageToday}
-      </span>
-
-    </div>
-
-    <div className="w-full bg-slate-700 rounded-full h-3">
-
-      <div
-        className="bg-blue-500 h-3 rounded-full"
-        style={{
-          width: `${Math.min(
-            aiUsageToday,
-            100
-          )}%`,
-        }}
-      />
-
-    </div>
-
-    <p className="text-slate-400 text-sm">
-      Tracks every AI report and startup idea generated today.
-    </p>
-
-  </div>
-
-</div>
-        {/* ALL TRENDS */}
-
-        <h2 className="text-3xl font-bold mb-6">
-          All Trends
-        </h2>
-
-        <div className="space-y-4">
-          {trendsList.map((trend) => (
-            <Link
-              key={trend.id}
-              href={`/trends/${trend.id}`}
-            >
-              <div className="glass p-4 rounded-xl flex justify-between items-center hover:border hover:border-blue-500 cursor-pointer">
-                <div>
-                  <h3 className="text-xl font-bold">
-                    {trend.title}
-                  </h3>
-
-                  <p className="text-gray-400">
-                    {trend.category}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-300 border border-green-500/20 text-sm">
-                    Score: {trend.score}
-                  </span>
-
-                  <button
-                    onClick={async (
-                      e
-                    ) => {
-                      e.preventDefault();
-
-                      const confirmed =
-                        confirm(
-                          "Delete this trend?"
-                        );
-
-                      if (
-                        !confirmed
-                      ) {
-                        return;
-                      }
-
-                      const {
-                        error,
-                      } =
-                        await supabase
-                          .from(
-                            "trends"
-                          )
-                          .delete()
-                          .eq(
-                            "id",
-                            trend.id
-                          );
-
-                      if (
-                        error
-                      ) {
-                        alert(
-                          error.message
-                        );
-                        return;
-                      }
-
-                      const updated =
-                        trendsList.filter(
-                          (
-                            t
-                          ) =>
-                            t.id !==
-                            trend.id
-                        );
-
-                      setTrendsList(
-                        updated
-                      );
-
-                      window.location.reload();
-                    }}
-
-                    className="
-                      bg-red-600
-                      px-3
-                      py-1
-                      rounded-xl
-                      shadow-[0_0_15px_rgba(239,68,68,0.35)]
-                    "
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </Link>
-          ))}
         </div>
+
+        <div className="grid lg:grid-cols-2 gap-8 mb-10">
+
+          <AIUsageCard
+  aiUsageToday={aiUsageToday}
+/>
+
+          {topTrend && (
+            <TopTrendCard
+              trend={topTrend}
+            />
+          )}
+
+        </div>
+
+        <SearchBar
+          value={search}
+          onChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
+        />
+
+        <CategoryFilter
+          categories={categories}
+          selected={selectedCategory}
+          onChange={(value) => {
+            setSelectedCategory(value);
+            setCurrentPage(1);
+          }}
+        />
+
+                <TrendTable
+          trends={paginatedTrends}
+          onDelete={async (id: number) => {
+            const confirmed = confirm(
+              "Delete this trend?"
+            );
+
+            if (!confirmed) return;
+
+            const { error } = await supabase
+              .from("trends")
+              .delete()
+              .eq("id", id);
+
+            if (error) {
+              alert(error.message);
+              return;
+            }
+
+            setTrendsList((previous) =>
+              previous.filter(
+                (trend) => trend.id !== id
+              )
+            );
+          }}
+        />
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={() =>
+            setCurrentPage((page) =>
+              Math.max(page - 1, 1)
+            )
+          }
+          onNext={() =>
+            setCurrentPage((page) =>
+              Math.min(page + 1, totalPages)
+            )
+          }
+        />
+
       </div>
     </main>
   );
