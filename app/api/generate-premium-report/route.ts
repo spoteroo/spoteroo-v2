@@ -1,30 +1,27 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+
+import { requireUser } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import {
   canUseFeature,
   incrementUsage,
 } from "@/lib/subscription";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(req: Request) {
   try {
+    const { email } = await requireUser();
+
     const {
       id,
       title,
       description,
-      email,
     } = await req.json();
 
-    // Check free/pro limits
     const allowed = await canUseFeature(
       email,
       "premium_reports",
-      2
+      1
     );
 
     if (!allowed) {
@@ -39,8 +36,19 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        {
+          error: "OpenAI API key missing.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY!,
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
     const response = await openai.responses.create({
@@ -51,23 +59,26 @@ Trend: ${title}
 Description:
 ${description}
 
-Create a detailed startup investment report.
+Create a professional startup investment report.
 
 Include:
 
-1. SWOT Analysis
-2. TAM SAM SOM
-3. Competitor Analysis
-4. Revenue Models
-5. Go To Market Strategy
-6. Funding Potential
-7. Exit Opportunities
+1. Executive Summary
+2. SWOT Analysis
+3. TAM / SAM / SOM
+4. Competitor Analysis
+5. Revenue Models
+6. Go-To-Market Strategy
+7. Funding Potential
+8. Exit Opportunities
+9. Risks
+10. Recommendation
 `,
     });
 
-    const report = response.output_text;
+    const report = response.output_text ?? "";
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("trends")
       .update({
         premium_report: report,
@@ -85,7 +96,6 @@ Include:
       );
     }
 
-    // Track usage
     await incrementUsage(
       email,
       "premium_reports"

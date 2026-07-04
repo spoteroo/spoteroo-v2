@@ -32,6 +32,17 @@ type Usage = {
   premiumReportsRemaining: number;
 };
 
+type Analytics = {
+  revenue: number;
+  mrr: number;
+  freeUsers: number;
+  proUsers: number;
+  subscribers: number;
+  votes: number;
+  aiRequests: number;
+  topCategories: [string, number][];
+};
+
 const ITEMS_PER_PAGE = 10;
 
 export default function DashboardPage() {
@@ -68,6 +79,15 @@ export default function DashboardPage() {
 
   const [aiUsageToday, setAiUsageToday] =
     useState(0);
+
+const [subscriberCount, setSubscriberCount] =
+  useState(0);
+
+const [votesCount, setVotesCount] =
+  useState(0);
+
+const [topCategory, setTopCategory] =
+  useState("");
 
   const [revenueChartData, setRevenueChartData] =
     useState<
@@ -167,6 +187,28 @@ export default function DashboardPage() {
         ]);
       }
 
+      const analyticsResponse = await fetch(
+  "/api/dashboard/analytics"
+);
+
+if (analyticsResponse.ok) {
+  const analytics =
+    await analyticsResponse.json();
+
+  setSubscriberCount(
+    analytics.subscribers
+  );
+
+  setVotesCount(
+    analytics.votes
+  );
+
+  setTopCategory(
+    analytics.topCategories?.[0]?.[0] ??
+      "N/A"
+  );
+}
+      
       const today =
         new Date()
           .toISOString()
@@ -310,17 +352,49 @@ export default function DashboardPage() {
 
         <div className="grid lg:grid-cols-2 gap-8 mb-10">
 
-          <AIUsageCard
-  aiUsageToday={aiUsageToday}
-/>
+  <AIUsageCard
+    aiUsageToday={aiUsageToday}
+  />
 
-          {topTrend && (
-            <TopTrendCard
-              trend={topTrend}
-            />
-          )}
+  {topTrend && (
+    <TopTrendCard trend={topTrend} />
+  )}
 
-        </div>
+</div>
+
+<div className="grid md:grid-cols-3 gap-6 mb-10">
+
+  <div className="glass p-6 rounded-2xl">
+    <h3 className="text-slate-400">
+      Newsletter Subscribers
+    </h3>
+
+    <p className="text-4xl font-bold mt-3">
+      {subscriberCount}
+    </p>
+  </div>
+
+  <div className="glass p-6 rounded-2xl">
+    <h3 className="text-slate-400">
+      Total Votes
+    </h3>
+
+    <p className="text-4xl font-bold mt-3">
+      {votesCount}
+    </p>
+  </div>
+
+  <div className="glass p-6 rounded-2xl">
+    <h3 className="text-slate-400">
+      Top Category
+    </h3>
+
+    <p className="text-2xl font-bold mt-3">
+      {topCategory}
+    </p>
+  </div>
+
+</div>
 
         <SearchBar
           value={search}

@@ -8,6 +8,34 @@ export default async function Home() {
     .order("score", { ascending: false })
     .limit(3);
 
+
+// Live Statistics
+
+const { count: trendCount } = await supabase
+  .from("trends")
+  .select("*", {
+    count: "exact",
+    head: true,
+  });
+
+const { count: subscriberCount } = await supabase
+  .from("newsletter_subscribers")
+  .select("*", {
+    count: "exact",
+    head: true,
+  });
+
+const { count: favoriteCount } = await supabase
+  .from("favorites")
+  .select("*", {
+    count: "exact",
+    head: true,
+  });
+
+const categoryCount = new Set(
+  trends?.map((trend) => trend.category)
+).size;
+
   return (
     <main className="min-h-screen text-white">
       <section className="max-w-7xl mx-auto px-6 py-20">
@@ -74,10 +102,16 @@ export default async function Home() {
         </div>
 
         {/* Stats */}
+
+<h2 className="text-4xl font-bold text-center mb-10">
+  Live Platform Statistics
+</h2>
+        
         <div className="grid md:grid-cols-3 gap-6 mb-24">
+          
           <div className="glass p-8 text-center">
             <h3 className="text-5xl font-bold text-white">
-              500+
+              {trendCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
               Trends Tracked
@@ -86,7 +120,7 @@ export default async function Home() {
 
           <div className="glass p-8 text-center">
             <h3 className="text-5xl font-bold text-white">
-              50+
+              {subscriberCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
               Categories
@@ -95,7 +129,7 @@ export default async function Home() {
 
           <div className="glass p-8 text-center">
             <h3 className="text-5xl font-bold text-white">
-              10K+
+              {favoriteCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
               Monthly Readers
@@ -104,6 +138,10 @@ export default async function Home() {
         </div>
 
         {/* Features */}
+
+<h2 className="text-4xl font-bold text-center mb-10">
+  Trending Categories
+</h2>
         <div className="grid md:grid-cols-3 gap-6 mb-24">
           <div className="glass p-8">
             <h3 className="text-2xl font-bold mb-4">
@@ -139,7 +177,11 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* Top Trends */}
+       {/* Top Trends */}
+
+<p className="text-center text-blue-400 mb-3">
+  Latest AI Generated Trend
+</p>
         <section className="mb-24">
           <h2 className="text-5xl font-bold mb-10">
             Top Trends
@@ -196,7 +238,168 @@ export default async function Home() {
           </div>
         </section>
 
+
         {/* CTA */}
+        {/* CUSTOMER TESTIMONIALS */}
+
+<section className="mb-24">
+  <h2 className="text-5xl font-bold mb-10 text-center">
+    Loved by Founders
+  </h2>
+
+  <div className="grid md:grid-cols-3 gap-6">
+
+    <div className="glass p-8">
+      <p className="text-slate-300 italic">
+        "Spoteroo helped us discover our
+        next startup opportunity months
+        before competitors."
+      </p>
+
+      <p className="mt-6 font-bold">
+        — Spoteroo Beta User
+      </p>
+    </div>
+
+    <div className="glass p-8">
+      <p className="text-slate-300 italic">
+        "The AI startup ideas alone are
+        worth the subscription."
+      </p>
+
+      <p className="mt-6 font-bold">
+        — Early Founder
+      </p>
+    </div>
+
+    <div className="glass p-8">
+      <p className="text-slate-300 italic">
+        "Every week we discover new
+        opportunities before everyone
+        else."
+      </p>
+
+      <p className="mt-6 font-bold">
+        — Product Builder
+      </p>
+    </div>
+
+  </div>
+</section>
+
+{/* TRUSTED BY */}
+
+<section className="mb-24 text-center">
+
+  <h2 className="text-4xl font-bold mb-10">
+    Trusted by Builders Worldwide
+  </h2>
+
+  <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+
+    <div className="glass p-6 font-bold">
+      Startup
+    </div>
+
+    <div className="glass p-6 font-bold">
+      VC
+    </div>
+
+    <div className="glass p-6 font-bold">
+      Accelerator
+    </div>
+
+    <div className="glass p-6 font-bold">
+      SaaS
+    </div>
+
+    <div className="glass p-6 font-bold">
+      AI Teams
+    </div>
+
+  </div>
+
+</section>
+
+{/* PRICING PREVIEW */}
+
+<section className="mb-24">
+
+  <div className="glass p-10 text-center">
+
+    <h2 className="text-5xl font-bold mb-4">
+      Upgrade to Pro
+    </h2>
+
+    <p className="text-slate-400 mb-8">
+      Unlimited AI reports, startup ideas,
+      premium analytics and much more.
+    </p>
+
+    <Link
+      href="/pricing"
+      className="
+        bg-blue-600
+        px-8
+        py-4
+        rounded-xl
+        font-semibold
+      "
+    >
+      View Pricing
+    </Link>
+
+  </div>
+
+</section>
+
+{/* FAQ */}
+
+<section className="mb-24">
+
+  <h2 className="text-5xl font-bold mb-10">
+    Frequently Asked Questions
+  </h2>
+
+  <div className="space-y-6">
+
+    <div className="glass p-6">
+      <h3 className="font-bold text-xl">
+        Is Spoteroo free?
+      </h3>
+
+      <p className="text-slate-400 mt-2">
+        Yes. You can explore trends for free,
+        with premium AI features available on
+        the Pro plan.
+      </p>
+    </div>
+
+    <div className="glass p-6">
+      <h3 className="font-bold text-xl">
+        How often are trends updated?
+      </h3>
+
+      <p className="text-slate-400 mt-2">
+        Our AI continuously discovers and
+        updates emerging opportunities.
+      </p>
+    </div>
+
+    <div className="glass p-6">
+      <h3 className="font-bold text-xl">
+        Can I cancel anytime?
+      </h3>
+
+      <p className="text-slate-400 mt-2">
+        Yes. You can upgrade or cancel your
+        subscription whenever you want.
+      </p>
+    </div>
+
+  </div>
+
+</section>
         <section className="glass p-12 text-center">
           <h2 className="text-5xl font-bold mb-6">
             Ready to discover the next

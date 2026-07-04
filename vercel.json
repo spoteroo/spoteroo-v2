@@ -1,8 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/cron/send-newsletter",
-      "schedule": "0 9 * * 1"
+      "path": "/api/cron/discover-trends",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/trend-history",
+      "schedule": "0 0 * * *"
     }
   ]
 }

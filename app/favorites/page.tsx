@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 
+
 type Trend = {
   id: number;
   title: string;
@@ -21,17 +22,25 @@ type FavoriteTrend = {
 };
 
 export default function FavoritesPage() {
+
+  const [loading, setLoading] =
+  useState(true);
+
   const [favorites, setFavorites] = useState<
     FavoriteTrend[]
   >([]);
 
   useEffect(() => {
     async function loadFavorites() {
+  setLoading(true);
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user?.email) return;
+     if (!user?.email) {
+  setLoading(false);
+  return;
+}
 
       const { data, error } = await supabase
         .from("favorites")
@@ -52,14 +61,37 @@ export default function FavoritesPage() {
       setFavorites(
         (data as FavoriteTrend[]) || []
       );
+
+      setLoading(false);
     }
 
     loadFavorites();
   }, []);
 
+  if (loading) {
+  return (
+    <main className="min-h-screen flex items-center justify-center text-white">
+      Loading Favorites...
+    </main>
+  );
+}
+
   return (
     <main className="min-h-screen text-white p-10">
       <div className="max-w-5xl mx-auto">
+
+        <Link
+  href="/trends"
+  className="
+    text-blue-400
+    hover:text-blue-300
+    mb-6
+    inline-block
+  "
+>
+  ← Back to Trends
+</Link>
+
         <div className="mb-10">
           <h1
             className="
@@ -123,6 +155,13 @@ export default function FavoritesPage() {
                   <p className="text-slate-400 mt-3">
                     {favorite.trends.description}
                   </p>
+
+                  <p className="text-xs text-slate-500 mt-2">
+  Saved on{" "}
+  {new Date(
+    favorite.created_at
+  ).toLocaleDateString()}
+</p>
 
                   <div className="flex gap-3 mt-4 flex-wrap">
                     <span

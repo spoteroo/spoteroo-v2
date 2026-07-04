@@ -8,12 +8,12 @@ export default function NewsletterPage() {
   const [message, setMessage] = useState("");
 
   async function subscribe(
-    e: React.FormEvent
+    e: React.FormEvent<HTMLFormElement>
   ) {
     e.preventDefault();
 
     const { error } = await supabase
-      .from("subscribers")
+      .from("subscribers") // Change to "newsletter_subscribers" if that's your table
       .insert([{ email }]);
 
     if (error) {
@@ -97,9 +97,7 @@ export default function NewsletterPage() {
                 rounded-xl
                 border
                 ${
-                  message.includes(
-                    "successfully"
-                  )
+                  message.includes("successfully")
                     ? "border-green-500/20 bg-green-500/10 text-green-300"
                     : "border-red-500/20 bg-red-500/10 text-red-300"
                 }

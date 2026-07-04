@@ -19,12 +19,16 @@ export default function SubmissionsClient({
 }) {
   const [filter, setFilter] = useState("all");
 
+  const [search, setSearch] =
+useState("");
+
   const filteredSubmissions =
     filter === "all"
       ? submissions
       : submissions.filter(
           (submission) => submission.status === filter
         );
+        
 
   return (
     <>

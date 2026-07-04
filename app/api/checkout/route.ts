@@ -10,9 +10,43 @@ const client = new DodoPayments({
 
 export async function POST(request: Request) {
   try {
-    const { plan, email } = await request.json();
+    const body = await request.json();
 
-    console.log("========== DODO CHECKOUT ==========");
+    const plan = body.plan;
+    const email = body.email;
+
+    //-------------------------------------------------------
+    // Validation
+    //-------------------------------------------------------
+
+    if (!email) {
+      return NextResponse.json(
+        {
+          error: "Email is required.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (
+      plan !== "monthly" &&
+      plan !== "yearly"
+    ) {
+      return NextResponse.json(
+        {
+          error: "Invalid plan.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    //-------------------------------------------------------
+    // Product
+    //-------------------------------------------------------
 
     const productId =
       plan === "yearly"
@@ -20,94 +54,67 @@ export async function POST(request: Request) {
         : process.env.DODO_MONTHLY_PRODUCT_ID;
 
     if (!productId) {
-      console.error("❌ Product ID missing");
-
-      return NextResponse.json(
-        {
-          error: "Product ID missing",
-        },
-        {
-          status: 500,
-        }
+      throw new Error(
+        `Missing product id for ${plan}`
       );
     }
 
-    console.log("Plan:", plan);
-    console.log("Email:", email);
-    console.log(
-      "Environment:",
-      process.env.DODO_PAYMENTS_ENVIRONMENT
-    );
-    console.log(
-      "API Key Exists:",
-      !!process.env.DODO_PAYMENTS_API_KEY
-    );
-    console.log(
-      "API Key Prefix:",
-      process.env.DODO_PAYMENTS_API_KEY?.substring(0, 8)
-    );
-    console.log("Product ID:", productId);
+    if (!process.env.DODO_PAYMENTS_RETURN_URL) {
+      throw new Error(
+        "Missing DODO_PAYMENTS_RETURN_URL"
+      );
+    }
 
-    const session = await client.checkoutSessions.create({
-      product_cart: [
-        {
-          product_id: productId,
-          quantity: 1,
-        },
-      ],
-      customer: {
-        email,
-      },
-      return_url: process.env.DODO_PAYMENTS_RETURN_URL!,
+    console.log("========== CHECKOUT ==========");
+    console.log({
+      email,
+      plan,
+      productId,
     });
 
-    console.log("========== DODO SUCCESS ==========");
-    console.log(session);
+    //-------------------------------------------------------
+    // Create Checkout Session
+    //-------------------------------------------------------
+
+    const session =
+      await client.checkoutSessions.create({
+        product_cart: [
+          {
+            product_id: productId,
+            quantity: 1,
+          },
+        ],
+        customer: {
+          email,
+        },
+        return_url:
+          process.env.DODO_PAYMENTS_RETURN_URL,
+      });
+
+    if (!session.checkout_url) {
+      throw new Error(
+        "Checkout URL not returned."
+      );
+    }
+
+    console.log("Checkout Created");
 
     return NextResponse.json({
+      success: true,
       checkout_url: session.checkout_url,
     });
-  } catch (error: unknown) {
-    console.error("========== DODO ERROR ==========");
+  } catch (error) {
+    console.error("Checkout Error");
     console.error(error);
 
-    let message = "Checkout failed";
-
-    if (error instanceof Error) {
-      message = error.message;
-      console.error("Message:", error.message);
-    }
-
-    if (
-      typeof error === "object" &&
-      error !== null
-    ) {
-      if ("status" in error) {
-        console.error(
-          "Status:",
-          (error as { status: unknown }).status
-        );
-      }
-
-      if ("response" in error) {
-        console.error(
-          "Response:",
-          (error as { response: unknown }).response
-        );
-      }
-
-      if ("body" in error) {
-        console.error(
-          "Body:",
-          (error as { body: unknown }).body
-        );
-      }
-    }
-
-    console.error("=================================");
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Checkout failed";
 
     return NextResponse.json(
       {
+        success: false,
         error: message,
       },
       {

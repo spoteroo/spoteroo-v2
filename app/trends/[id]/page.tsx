@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import UpgradePrompt from "@/app/components/UpgradePrompt";
+import TrendHistoryChart from "@/app/components/charts/TrendHistoryChart";
 
 type Trend = {
   id: number;
@@ -19,6 +20,16 @@ type Trend = {
   competitors?: string;
   risks?: string;
   premium_report?: string;
+  opportunity_score?: number | null;
+momentum?: string | null;
+investment_rating?: string | null;
+competition_level?: string | null;
+market_size?: string | null;
+forecast_30d?: number | null;
+forecast_90d?: number | null;
+forecast_1y?: number | null;
+success_probability?: number | null;
+unicorn_potential?: number | null;
 };
 
 export default function TrendDetailPage() {
@@ -43,6 +54,14 @@ export default function TrendDetailPage() {
     const [isPro, setIsPro] =
   useState(false);
 
+  const [history, setHistory] = useState<
+  {
+    score: number;
+    votes: number;
+    captured_at: string;
+  }[]
+>([]);
+
   useEffect(() => {
     const fetchTrend = async () => {
       const { data, error } = await supabase
@@ -59,17 +78,22 @@ export default function TrendDetailPage() {
         return;
       }
 
-      console.log("TREND DATA:", data);
-console.log("PREMIUM REPORT:", data?.premium_report);
-
       setTrend(data);
 
-      const {
+      const historyResponse = await fetch(
+  `/api/trends/${id}/history`
+);
+
+if (historyResponse.ok) {
+  const historyData = await historyResponse.json();
+  setHistory(historyData);
+}
+
+const {
   data: { user },
 } = await supabase.auth.getUser();
 
 if (user) {
-  console.log("USER ID:", user.id);
 
   const { data: profile, error } =
     await supabase
@@ -77,9 +101,7 @@ if (user) {
       .select("*")
       .eq("id", user.id)
       .single();
-
-  console.log("PROFILE:", profile);
-  console.log("PROFILE ERROR:", error);
+ 
 
   setIsPro(profile?.plan === "pro");
 }
@@ -148,9 +170,6 @@ if (user) {
 
   setLoadingIdea(true);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   await fetch("/api/generate-idea", {
     method: "POST",
@@ -158,11 +177,10 @@ if (user) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      id: trend.id,
-      title: trend.title,
-      description: trend.description,
-      email: user?.email,
-    }),
+  id: trend.id,
+  title: trend.title,
+  description: trend.description,
+}),
   });
 
   const { data } = await supabase
@@ -181,13 +199,9 @@ if (user) {
 const generatePremiumReport = async () => {
   if (!trend) return;
 
-  console.log("BUTTON CLICKED");
 
   setLoadingReport(true);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const response = await fetch(
     "/api/generate-premium-report",
@@ -197,15 +211,12 @@ const generatePremiumReport = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        id: trend.id,
-        title: trend.title,
-        description: trend.description,
-        email: user?.email,
-      }),
+  id: trend.id,
+  title: trend.title,
+  description: trend.description,
+}),
     }
   );
-
-  console.log("STATUS:", response.status);
 
   const { data } = await supabase
     .from("trends")
@@ -243,6 +254,122 @@ const generatePremiumReport = async () => {
             <h1 className="text-5xl font-bold">
               {trend.title}
             </h1>
+
+            <div className="grid md:grid-cols-5 gap-4 mt-8 mb-10">
+
+  <div className="glass p-5 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Opportunity Score
+    </p>
+
+    <h2 className="text-3xl font-bold text-green-400">
+      {trend.opportunity_score ?? "-"}
+    </h2>
+  </div>
+
+  <div className="glass p-5 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Momentum
+    </p>
+
+    <h2 className="text-2xl font-bold text-blue-400">
+      {trend.momentum ?? "-"}
+    </h2>
+  </div>
+
+  <div className="glass p-5 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Investment Rating
+    </p>
+
+    <h2 className="text-2xl font-bold text-yellow-400">
+      {trend.investment_rating ?? "-"}
+    </h2>
+  </div>
+
+  <div className="glass p-5 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Competition
+    </p>
+
+    <h2 className="text-2xl font-bold">
+      {trend.competition_level ?? "-"}
+    </h2>
+  </div>
+
+  <div className="glass p-5 rounded-2xl">
+    <p className="text-slate-400 text-sm">
+      Market Size
+    </p>
+
+    <h2 className="text-2xl font-bold text-cyan-400">
+      {trend.market_size ?? "-"}
+    </h2>
+  </div>
+
+</div>
+
+<div className="glass rounded-3xl p-8 mb-10">
+
+  <h2 className="text-3xl font-bold mb-8">
+    📈 AI Forecast
+  </h2>
+
+  <div className="grid md:grid-cols-5 gap-6">
+
+    <div>
+      <p className="text-slate-400">
+        30 Days
+      </p>
+
+      <p className="text-3xl font-bold text-green-400">
+        +{trend.forecast_30d ?? 0}%
+      </p>
+    </div>
+
+    <div>
+      <p className="text-slate-400">
+        90 Days
+      </p>
+
+      <p className="text-3xl font-bold text-blue-400">
+        +{trend.forecast_90d ?? 0}%
+      </p>
+    </div>
+
+    <div>
+      <p className="text-slate-400">
+        1 Year
+      </p>
+
+      <p className="text-3xl font-bold text-cyan-400">
+        +{trend.forecast_1y ?? 0}%
+      </p>
+    </div>
+
+    <div>
+      <p className="text-slate-400">
+        Success
+      </p>
+
+      <p className="text-3xl font-bold text-yellow-400">
+        {trend.success_probability ?? 0}%
+      </p>
+    </div>
+
+    <div>
+      <p className="text-slate-400">
+        Unicorn Chance
+      </p>
+
+      <p className="text-3xl font-bold text-pink-400">
+        {trend.unicorn_potential ?? 0}%
+      </p>
+    </div>
+
+  </div>
+
+</div>
 
             <div className="flex gap-4 mt-4">
              <button
@@ -562,6 +689,10 @@ const generatePremiumReport = async () => {
             
     </div>
   </>
+)}
+
+{history.length > 0 && (
+  <TrendHistoryChart data={history} />
 )}
 
         </div>

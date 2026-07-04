@@ -1,63 +1,114 @@
 import { NextResponse } from "next/server";
+import { upgradeUser, downgradeUser } from "@/lib/subscription";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function GET() {
   return NextResponse.json({
-    message: "Dodo Webhook is running",
+    success: true,
+    message: "Dodo webhook is running",
   });
 }
 
 export async function POST(request: Request) {
   try {
-    console.log("WEBHOOK VERSION 2");
+    console.log("========== DODO WEBHOOK ==========");
+
+    // ------------------------------------------------------------------
+    // TODO:
+    // Add Dodo webhook signature verification here before production.
+    // Docs:
+    // https://docs.dodopayments.com/developer-resources/webhooks
+    // ------------------------------------------------------------------
+
     const payload = await request.json();
 
-    console.log("========== DODO WEBHOOK ==========");
     console.log(JSON.stringify(payload, null, 2));
 
-    const event = payload.type;
+    const event = payload?.type;
 
-    console.log("Event Type:", event);
+    if (!event) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing event type",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
-    if (
-      event === "subscription.active" ||
-      event === "payment.succeeded"
-    ) {
-      console.log("ENTERED UPDATE BLOCK");
+    console.log("Webhook Event:", event);
 
-      const email = payload.data.customer.email;
-      if (!email) {
-  return NextResponse.json(
-    { success: false, error: "Missing customer email" },
-    { status: 400 }
-  );
-}
-      const customerId = payload.data.customer.customer_id;
-      const subscriptionId = payload.data.subscription_id;
-      const status = payload.data.status;
+    const email =
+      payload?.data?.customer?.email ??
+      payload?.data?.email ??
+      null;
 
-      console.log("Webhook Email:", email);
-      console.log("Customer ID:", customerId);
-      console.log("Subscription ID:", subscriptionId);
-      console.log("Status:", status);
+    if (!email) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Customer email missing",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
-      const { data, error } = await supabaseAdmin
+    const customerId =
+      payload?.data?.customer?.customer_id ??
+      payload?.data?.customer_id ??
+      null;
+
+    const subscriptionId =
+      payload?.data?.subscription?.subscription_id ??
+      payload?.data?.subscription_id ??
+      null;
+
+    const subscriptionStatus =
+      payload?.data?.status ??
+      "active";
+
+    //-------------------------------------------------------------------
+    // Upgrade Events
+    //-------------------------------------------------------------------
+
+    const upgradeEvents = [
+      "payment.succeeded",
+      "subscription.active",
+      "subscription.created",
+      "subscription.renewed",
+    ];
+
+    //-------------------------------------------------------------------
+    // Downgrade Events
+    //-------------------------------------------------------------------
+
+    const downgradeEvents = [
+      "subscription.cancelled",
+      "subscription.expired",
+      "subscription.failed",
+      "payment.failed",
+    ];
+
+    if (upgradeEvents.includes(event)) {
+      console.log("Upgrading user:", email);
+
+      await upgradeUser(email);
+
+      const { error } = await supabaseAdmin
         .from("profiles")
         .update({
-          plan: "pro",
-          subscription_status: status,
+          subscription_status: subscriptionStatus,
           dodo_customer_id: customerId,
           dodo_subscription_id: subscriptionId,
         })
-        .eq("email", email)
-        .select();
-
-      console.log("========== SUPABASE UPDATE ==========");
-      console.log("Updated Rows:", data);
-      console.log("Supabase Error:", error);
+        .eq("email", email);
 
       if (error) {
-        console.error("Supabase Update Failed:", error);
+        console.error(error);
 
         return NextResponse.json(
           {
@@ -70,24 +121,68 @@ export async function POST(request: Request) {
         );
       }
 
-      if (!data || data.length === 0) {
-        console.log("⚠️ No profile found for email:", email);
-      } else {
-        console.log("✅ Profile upgraded:", email);
-      }
-    } else {
-      console.log("Ignoring event:", event);
+      console.log("User upgraded.");
+
+      return NextResponse.json({
+        success: true,
+      });
     }
+
+    //-------------------------------------------------------------------
+    // Downgrade
+    //-------------------------------------------------------------------
+
+    if (downgradeEvents.includes(event)) {
+      console.log("Downgrading:", email);
+
+      await downgradeUser(email);
+
+      const { error } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          subscription_status: subscriptionStatus,
+        })
+        .eq("email", email);
+
+      if (error) {
+        console.error(error);
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: error.message,
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+
+      console.log("User downgraded.");
+
+      return NextResponse.json({
+        success: true,
+      });
+    }
+
+    //-------------------------------------------------------------------
+    // Ignore everything else
+    //-------------------------------------------------------------------
+
+    console.log("Ignoring event:", event);
 
     return NextResponse.json({
       success: true,
+      ignored: true,
     });
   } catch (error) {
-    console.error("Webhook Error:", error);
+    console.error("Webhook Error:");
+    console.error(error);
 
     return NextResponse.json(
       {
         success: false,
+        error: "Webhook failed",
       },
       {
         status: 500,

@@ -1,61 +1,48 @@
-import { supabaseAdmin } from "./supabase-admin";
+import { createClient } from "@supabase/supabase-js";
 
-export async function isPro(email: string) {
-  const { data } = await supabaseAdmin
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export type UserPlan = "free" | "pro";
+
+export async function getUserPlan(
+  email: string
+): Promise<UserPlan> {
+  const { data } = await supabase
     .from("profiles")
     .select("plan")
     .eq("email", email)
     .single();
 
-  return data?.plan === "pro";
+  if (!data) return "free";
+
+  return data.plan === "pro"
+    ? "pro"
+    : "free";
 }
 
-export async function getUsage(
-  email: string,
-  feature: string
-) {
-  const today = new Date().toISOString().split("T")[0];
-
-  const { data } = await supabaseAdmin
-    .from("ai_usage")
-    .select("count")
-    .eq("email", email)
-    .eq("feature", feature)
-    .eq("usage_date", today)
-    .single();
-
-  return data?.count ?? 0;
+export async function isPro(email: string) {
+  return (await getUserPlan(email)) === "pro";
 }
 
-export async function incrementUsage(
-  email: string,
-  feature: string
-) {
-  const today = new Date().toISOString().split("T")[0];
-
-  const current = await getUsage(email, feature);
-
-  if (current === 0) {
-    await supabaseAdmin
-      .from("ai_usage")
-      .insert({
-        email,
-        feature,
-        usage_date: today,
-        count: 1,
-      });
-
-    return;
-  }
-
-  await supabaseAdmin
-    .from("ai_usage")
+export async function upgradeUser(email: string) {
+  await supabase
+    .from("profiles")
     .update({
-      count: current + 1,
+      plan: "pro",
     })
-    .eq("email", email)
-    .eq("feature", feature)
-    .eq("usage_date", today);
+    .eq("email", email);
+}
+
+export async function downgradeUser(email: string) {
+  await supabase
+    .from("profiles")
+    .update({
+      plan: "free",
+    })
+    .eq("email", email);
 }
 
 export async function canUseFeature(
@@ -65,11 +52,56 @@ export async function canUseFeature(
 ) {
   const pro = await isPro(email);
 
-  if (pro) {
-    return true;
+  if (pro) return true;
+
+  const today = new Date()
+    .toISOString()
+    .split("T")[0];
+
+  const { data } = await supabase
+    .from("ai_usage")
+    .select("count")
+    .eq("email", email)
+    .eq("feature", feature)
+    .eq("usage_date", today)
+    .maybeSingle();
+
+  const count = data?.count ?? 0;
+
+  return count < freeLimit;
+}
+
+export async function incrementUsage(
+  email: string,
+  feature: string
+) {
+  const today = new Date()
+    .toISOString()
+    .split("T")[0];
+
+  const { data } = await supabase
+    .from("ai_usage")
+    .select("*")
+    .eq("email", email)
+    .eq("feature", feature)
+    .eq("usage_date", today)
+    .maybeSingle();
+
+  if (!data) {
+    await supabase.from("ai_usage").insert({
+      email,
+      feature,
+      usage_date: today,
+      count: 1,
+    });
+
+    return;
   }
 
-  const usage = await getUsage(email, feature);
-
-  return usage < freeLimit;
+  await supabase
+    .from("ai_usage")
+    .update({
+      count: data.count + 1,
+    })
+    .eq("id", data.id);
 }
