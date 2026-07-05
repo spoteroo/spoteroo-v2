@@ -1,11 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 
 import UserMenu from "./components/navbar/UserMenu";
+import GoogleAnalytics from "./components/GoogleAnalytics";
+import MicrosoftClarity from "./components/MicrosoftClarity";
 
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +22,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://spoteroo.com"),
+  alternates: {
+  canonical: "/",
+},
 
   title: {
     default: "Spoteroo | Discover Emerging Startup Opportunities",
@@ -50,11 +56,24 @@ export const metadata: Metadata = {
   creator: "Spoteroo",
 
   publisher: "Spoteroo",
+  applicationName: "Spoteroo",
+
+category: "Business",
+
+referrer: "origin-when-cross-origin",
 
   robots: {
+  index: true,
+  follow: true,
+  nocache: false,
+  googleBot: {
     index: true,
     follow: true,
+    "max-image-preview": "large",
+    "max-video-preview": -1,
+    "max-snippet": -1,
   },
+},
 
   openGraph: {
     title: "Spoteroo | Discover Emerging Startup Opportunities",
@@ -87,6 +106,11 @@ export const metadata: Metadata = {
     shortcut: "/favicon.png",
     apple: "/favicon.png",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -173,6 +197,42 @@ export default function RootLayout({
         </nav>
 
         {children}
+
+        <script
+  type="application/ld+json"
+  suppressHydrationWarning
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "Spoteroo",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "AI-powered opportunity intelligence platform for discovering emerging startup trends and market opportunities.",
+      url: "https://spoteroo.com",
+      offers: {
+        "@type": "Offer",
+        price: "49",
+        priceCurrency: "USD",
+      },
+      creator: {
+        "@type": "Organization",
+        name: "Spoteroo",
+      },
+    }),
+  }}
+/>
+
+<GoogleAnalytics />
+
+<MicrosoftClarity />
+
+        <Toaster
+  position="top-right"
+  richColors
+  closeButton
+/>
 
         <footer className="border-t border-white/10 mt-20 py-10">
           <div className="max-w-6xl mx-auto px-6">
