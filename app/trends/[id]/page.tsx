@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import UpgradePrompt from "@/app/components/UpgradePrompt";
 import TrendHistoryChart from "@/app/components/charts/TrendHistoryChart";
+import { toast } from "sonner";
 
 type Trend = {
   id: number;
@@ -14,22 +15,34 @@ type Trend = {
   description: string;
   category: string;
   score: number;
+
   reason?: string;
+
   startup_idea?: string;
   market_analysis?: string;
   competitors?: string;
   risks?: string;
+
   premium_report?: string;
+
   opportunity_score?: number | null;
-momentum?: string | null;
-investment_rating?: string | null;
-competition_level?: string | null;
-market_size?: string | null;
-forecast_30d?: number | null;
-forecast_90d?: number | null;
-forecast_1y?: number | null;
-success_probability?: number | null;
-unicorn_potential?: number | null;
+  momentum?: string | null;
+  investment_rating?: string | null;
+  competition_level?: string | null;
+  market_size?: string | null;
+
+  forecast_30d?: number | null;
+  forecast_90d?: number | null;
+  forecast_1y?: number | null;
+
+  success_probability?: number | null;
+  unicorn_potential?: number | null;
+};
+
+type HistoryPoint = {
+  score: number;
+  votes: number;
+  captured_at: string;
 };
 
 export default function TrendDetailPage() {
@@ -41,74 +54,75 @@ export default function TrendDetailPage() {
       : params.id
   );
 
-  const [trend, setTrend] = useState<Trend | null>(
-    null
-  );
+  const [trend, setTrend] =
+    useState<Trend | null>(null);
+
+  const [history, setHistory] =
+    useState<HistoryPoint[]>([]);
 
   const [loadingIdea, setLoadingIdea] =
     useState(false);
 
-    const [loadingReport, setLoadingReport] =
-  useState(false);
+  const [
+    loadingReport,
+    setLoadingReport,
+  ] = useState(false);
 
-    const [isPro, setIsPro] =
-  useState(false);
-
-  const [history, setHistory] = useState<
-  {
-    score: number;
-    votes: number;
-    captured_at: string;
-  }[]
->([]);
+  const [isPro, setIsPro] =
+    useState(false);
 
   useEffect(() => {
-    const fetchTrend = async () => {
-      const { data, error } = await supabase
-        .from("trends")
-        .select("*")
-        .eq("id", id)
-        .single();
+    async function loadTrend() {
+      const { data, error } =
+        await supabase
+          .from("trends")
+          .select("*")
+          .eq("id", id)
+          .single();
 
       if (error) {
-        console.error(
-          "Trend fetch error:",
-          error
+        console.error(error);
+
+        toast.error(
+          "Unable to load trend."
         );
+
         return;
       }
 
       setTrend(data);
 
-      const historyResponse = await fetch(
-  `/api/trends/${id}/history`
-);
+      const historyResponse =
+        await fetch(
+          `/api/trends/${id}/history`
+        );
 
-if (historyResponse.ok) {
-  const historyData = await historyResponse.json();
-  setHistory(historyData);
-}
+      if (historyResponse.ok) {
+        setHistory(
+          await historyResponse.json()
+        );
+      }
 
-const {
-  data: { user },
-} = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-if (user) {
+      if (!user) return;
 
-  const { data: profile, error } =
-    await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
- 
+      const { data: profile } =
+        await supabase
+          .from("profiles")
+          .select("plan")
+          .eq("id", user.id)
+          .single();
 
-  setIsPro(profile?.plan === "pro");
-}
-    };
+      setIsPro(
+        profile?.plan === "pro"
+      );
+    }
 
     if (id) {
-      fetchTrend();
+      loadTrend();
     }
   }, [id]);
 
@@ -138,25 +152,31 @@ if (user) {
       `Description: ${trend.description}`,
       20,
       70,
-      { maxWidth: 170 }
+      {
+        maxWidth: 170,
+      }
     );
 
     doc.text(
       `Startup Idea: ${
-        trend.startup_idea || "N/A"
+        trend.startup_idea ?? "N/A"
       }`,
       20,
       110,
-      { maxWidth: 170 }
+      {
+        maxWidth: 170,
+      }
     );
 
     doc.text(
       `Market Analysis: ${
-        trend.market_analysis || "N/A"
+        trend.market_analysis ?? "N/A"
       }`,
       20,
       160,
-      { maxWidth: 170 }
+      {
+        maxWidth: 170,
+      }
     );
 
     doc.save(
@@ -164,76 +184,131 @@ if (user) {
     );
   };
 
+    const generateIdea = async () => {
+    if (!trend) return;
 
- const generateIdea = async () => {
-  if (!trend) return;
+    setLoadingIdea(true);
 
-  setLoadingIdea(true);
+    try {
+      const response = await fetch(
+        "/api/generate-idea",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            id: trend.id,
+            title: trend.title,
+            description:
+              trend.description,
+          }),
+        }
+      );
 
+      const result =
+        await response.json();
 
-  await fetch("/api/generate-idea", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-  id: trend.id,
-  title: trend.title,
-  description: trend.description,
-}),
-  });
+      if (!response.ok) {
+        toast.error(
+          result.error ??
+            "Failed to generate startup idea."
+        );
 
-  const { data } = await supabase
-    .from("trends")
-    .select("*")
-    .eq("id", trend.id)
-    .single();
+        return;
+      }
 
-  if (data) {
-    setTrend(data);
-  }
+      const { data } =
+        await supabase
+          .from("trends")
+          .select("*")
+          .eq("id", trend.id)
+          .single();
 
-  setLoadingIdea(false);
-};
+      if (data) {
+        setTrend(data);
+      }
 
-const generatePremiumReport = async () => {
-  if (!trend) return;
+      toast.success(
+        "Startup idea generated!"
+      );
+    } catch (error) {
+      console.error(error);
 
-
-  setLoadingReport(true);
-
-
-  const response = await fetch(
-    "/api/generate-premium-report",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-  id: trend.id,
-  title: trend.title,
-  description: trend.description,
-}),
+      toast.error(
+        "Something went wrong."
+      );
+    } finally {
+      setLoadingIdea(false);
     }
-  );
+  };
 
-  const { data } = await supabase
-    .from("trends")
-    .select("*")
-    .eq("id", trend.id)
-    .single();
+  const generatePremiumReport =
+    async () => {
+      if (!trend) return;
 
-  if (data) {
-    setTrend(data);
-  }
+      setLoadingReport(true);
 
-  setLoadingReport(false);
-};
+      try {
+        const response =
+          await fetch(
+            "/api/generate-premium-report",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                id: trend.id,
+                title: trend.title,
+                description:
+                  trend.description,
+              }),
+            }
+          );
+
+        const result =
+          await response.json();
+
+        if (!response.ok) {
+          toast.error(
+            result.error ??
+              "Failed to generate premium report."
+          );
+
+          return;
+        }
+
+        const { data } =
+          await supabase
+            .from("trends")
+            .select("*")
+            .eq("id", trend.id)
+            .single();
+
+        if (data) {
+          setTrend(data);
+        }
+
+        toast.success(
+          "Premium report generated!"
+        );
+      } catch (error) {
+        console.error(error);
+
+        toast.error(
+          "Something went wrong."
+        );
+      } finally {
+        setLoadingReport(false);
+      }
+    };
 
   if (!trend) {
     return (
-      <main className="min-h-screen text-white flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center text-white">
         Loading...
       </main>
     );
@@ -242,6 +317,7 @@ const generatePremiumReport = async () => {
   return (
     <main className="min-h-screen text-white p-10">
       <div className="max-w-4xl mx-auto">
+
         <Link
           href="/trends"
           className="text-blue-400 hover:text-blue-300 mb-6 inline-block"
@@ -249,455 +325,491 @@ const generatePremiumReport = async () => {
           ← Back to Trends
         </Link>
 
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-5xl font-bold">
-              {trend.title}
-            </h1>
+        <div>
 
-            <div className="grid md:grid-cols-5 gap-4 mt-8 mb-10">
+          <h1 className="text-5xl font-bold">
+            {trend.title}
+          </h1>
 
-  <div className="glass p-5 rounded-2xl">
-    <p className="text-slate-400 text-sm">
-      Opportunity Score
-    </p>
+          <div className="grid md:grid-cols-5 gap-4 mt-8 mb-10">
 
-    <h2 className="text-3xl font-bold text-green-400">
-      {trend.opportunity_score ?? "-"}
-    </h2>
-  </div>
+                      <div className="glass p-5 rounded-2xl">
+            <p className="text-slate-400 text-sm">
+              Opportunity Score
+            </p>
 
-  <div className="glass p-5 rounded-2xl">
-    <p className="text-slate-400 text-sm">
-      Momentum
-    </p>
+            <h2 className="text-3xl font-bold text-green-400">
+              {trend.opportunity_score ?? "-"}
+            </h2>
+          </div>
 
-    <h2 className="text-2xl font-bold text-blue-400">
-      {trend.momentum ?? "-"}
-    </h2>
-  </div>
+          <div className="glass p-5 rounded-2xl">
+            <p className="text-slate-400 text-sm">
+              Momentum
+            </p>
 
-  <div className="glass p-5 rounded-2xl">
-    <p className="text-slate-400 text-sm">
-      Investment Rating
-    </p>
+            <h2 className="text-2xl font-bold text-blue-400">
+              {trend.momentum ?? "-"}
+            </h2>
+          </div>
 
-    <h2 className="text-2xl font-bold text-yellow-400">
-      {trend.investment_rating ?? "-"}
-    </h2>
-  </div>
+          <div className="glass p-5 rounded-2xl">
+            <p className="text-slate-400 text-sm">
+              Investment Rating
+            </p>
 
-  <div className="glass p-5 rounded-2xl">
-    <p className="text-slate-400 text-sm">
-      Competition
-    </p>
+            <h2 className="text-2xl font-bold text-yellow-400">
+              {trend.investment_rating ?? "-"}
+            </h2>
+          </div>
 
-    <h2 className="text-2xl font-bold">
-      {trend.competition_level ?? "-"}
-    </h2>
-  </div>
+          <div className="glass p-5 rounded-2xl">
+            <p className="text-slate-400 text-sm">
+              Competition
+            </p>
 
-  <div className="glass p-5 rounded-2xl">
-    <p className="text-slate-400 text-sm">
-      Market Size
-    </p>
+            <h2 className="text-2xl font-bold">
+              {trend.competition_level ?? "-"}
+            </h2>
+          </div>
 
-    <h2 className="text-2xl font-bold text-cyan-400">
-      {trend.market_size ?? "-"}
-    </h2>
-  </div>
+          <div className="glass p-5 rounded-2xl">
+            <p className="text-slate-400 text-sm">
+              Market Size
+            </p>
 
-</div>
+            <h2 className="text-2xl font-bold text-cyan-400">
+              {trend.market_size ?? "-"}
+            </h2>
+          </div>
 
-<div className="glass rounded-3xl p-8 mb-10">
+          </div>
 
-  <h2 className="text-3xl font-bold mb-8">
-    📈 AI Forecast
-  </h2>
+          <div className="glass rounded-3xl p-8 mb-10">
 
-  <div className="grid md:grid-cols-5 gap-6">
+            <h2 className="text-3xl font-bold mb-8">
+              📈 AI Forecast
+            </h2>
 
-    <div>
-      <p className="text-slate-400">
-        30 Days
-      </p>
+            <div className="grid md:grid-cols-5 gap-6">
 
-      <p className="text-3xl font-bold text-green-400">
-        +{trend.forecast_30d ?? 0}%
-      </p>
-    </div>
+              <div>
+                <p className="text-slate-400">
+                  30 Days
+                </p>
 
-    <div>
-      <p className="text-slate-400">
-        90 Days
-      </p>
+                <p className="text-3xl font-bold text-green-400">
+                  +{trend.forecast_30d ?? 0}%
+                </p>
+              </div>
 
-      <p className="text-3xl font-bold text-blue-400">
-        +{trend.forecast_90d ?? 0}%
-      </p>
-    </div>
+              <div>
+                <p className="text-slate-400">
+                  90 Days
+                </p>
 
-    <div>
-      <p className="text-slate-400">
-        1 Year
-      </p>
+                <p className="text-3xl font-bold text-blue-400">
+                  +{trend.forecast_90d ?? 0}%
+                </p>
+              </div>
 
-      <p className="text-3xl font-bold text-cyan-400">
-        +{trend.forecast_1y ?? 0}%
-      </p>
-    </div>
+              <div>
+                <p className="text-slate-400">
+                  1 Year
+                </p>
 
-    <div>
-      <p className="text-slate-400">
-        Success
-      </p>
+                <p className="text-3xl font-bold text-cyan-400">
+                  +{trend.forecast_1y ?? 0}%
+                </p>
+              </div>
 
-      <p className="text-3xl font-bold text-yellow-400">
-        {trend.success_probability ?? 0}%
-      </p>
-    </div>
+              <div>
+                <p className="text-slate-400">
+                  Success
+                </p>
 
-    <div>
-      <p className="text-slate-400">
-        Unicorn Chance
-      </p>
+                <p className="text-3xl font-bold text-yellow-400">
+                  {trend.success_probability ?? 0}%
+                </p>
+              </div>
 
-      <p className="text-3xl font-bold text-pink-400">
-        {trend.unicorn_potential ?? 0}%
-      </p>
-    </div>
+              <div>
+                <p className="text-slate-400">
+                  Unicorn Chance
+                </p>
 
-  </div>
+                <p className="text-3xl font-bold text-pink-400">
+                  {trend.unicorn_potential ?? 0}%
+                </p>
+              </div>
 
-</div>
+            </div>
 
-            <div className="flex gap-4 mt-4">
-             <button
-  onClick={async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+          </div>
 
-  if (!user?.email) {
-    alert("Please login first");
-    return;
-  }
+          <div className="flex flex-wrap gap-4 mt-8">
 
-  const { data: existing } = await supabase
-    .from("favorites")
-    .select("id")
-    .eq("user_email", user.email)
-    .eq("trend_id", trend.id)
-    .maybeSingle();
+            <button
+              onClick={downloadPDF}
+              className="bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-xl"
+            >
+              Download PDF
+            </button>
 
-  if (existing) {
-    alert("Already saved!");
-    return;
-  }
+            <button
+              onClick={() => window.print()}
+              className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl"
+            >
+              Print
+            </button>
 
-  const { error } = await supabase
-    .from("favorites")
-    .insert({
-      user_email: user.email,
-      trend_id: trend.id,
-    });
+            <button
+              onClick={async () => {
+                if (navigator.share) {
+                  await navigator.share({
+                    title: trend.title,
+                    url: window.location.href,
+                  });
+                } else {
+                  await navigator.clipboard.writeText(
+                    window.location.href
+                  );
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+                  toast.success(
+                    "Link copied!"
+                  );
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl"
+            >
+              Share
+            </button>
 
-  alert("Trend saved!");
-}}
-  className="
-    bg-yellow-600
-    px-4 py-2
-    rounded-xl
-    shadow-[0_0_20px_rgba(234,179,8,0.35)]
-  "
->
-  Save Trend
-  
-</button>
+            <button
+              onClick={async () => {
+                await navigator.clipboard.writeText(
+                  window.location.href
+                );
+
+                toast.success(
+                  "Link copied!"
+                );
+              }}
+              className="bg-slate-700 hover:bg-slate-600 px-5 py-3 rounded-xl"
+            >
+              Copy Link
+            </button>
+
+                        <button
+              onClick={async () => {
+                const {
+                  data: { user },
+                } = await supabase.auth.getUser();
+
+                if (!user?.email) {
+                  toast.error("Please login first");
+                  return;
+                }
+
+                const { data: existing } =
+                  await supabase
+                    .from("favorites")
+                    .select("id")
+                    .eq(
+                      "user_email",
+                      user.email
+                    )
+                    .eq(
+                      "trend_id",
+                      trend.id
+                    )
+                    .maybeSingle();
+
+                if (existing) {
+                  toast.info(
+                    "Already saved!"
+                  );
+                  return;
+                }
+
+                const { error } =
+                  await supabase
+                    .from("favorites")
+                    .insert({
+                      user_email:
+                        user.email,
+                      trend_id:
+                        trend.id,
+                    });
+
+                if (error) {
+                  toast.error(
+                    error.message
+                  );
+                  return;
+                }
+
+                toast.success(
+                  "Trend saved!"
+                );
+              }}
+              className="bg-yellow-600 hover:bg-yellow-700 px-5 py-3 rounded-xl"
+            >
+              ⭐ Save Trend
+            </button>
+
+            {isPro && (
+              <button
+                onClick={
+                  generatePremiumReport
+                }
+                disabled={
+                  loadingReport
+                }
+                className="bg-cyan-600 hover:bg-cyan-700 px-5 py-3 rounded-xl disabled:opacity-50"
+              >
+                {loadingReport
+                  ? "Generating..."
+                  : "Premium Report"}
+              </button>
+            )}
+
+          </div>
+
+          <div className="mt-8 mb-6">
+
+            <span className="px-4 py-2 rounded-full bg-blue-500/20 border border-blue-500/20 text-blue-300">
+              {trend.category}
+            </span>
+
+          </div>
+
+          <div className="glass p-6 mb-6">
+
+            <h2 className="text-3xl font-bold mb-4">
+              Description
+            </h2>
+
+            <p className="text-slate-300 leading-8">
+              {trend.description}
+            </p>
+
+          </div>
+
+          {trend.reason && (
+
+            <div className="glass p-6 mb-6">
+
+              <h2 className="text-3xl font-bold mb-4">
+                Why This Trend Matters
+              </h2>
+
+              <p className="text-slate-300 leading-8">
+                {trend.reason}
+              </p>
+
+            </div>
+
+          )}
+
+          <div className="flex gap-4 mb-8">
+
+            <button
+              onClick={async () => {
+                const response =
+                  await fetch(
+                    "/api/vote",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type":
+                          "application/json",
+                      },
+                      body: JSON.stringify({
+                        trendId:
+                          trend.id,
+                        voteType:
+                          "upvote",
+                      }),
+                    }
+                  );
+
+                if (!response.ok) {
+                  toast.error(
+                    "Unable to record vote."
+                  );
+                  return;
+                }
+
+                toast.success(
+                  "Thanks for your vote!"
+                );
+              }}
+              className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl"
+            >
+              👍 Upvote
+            </button>
+
+            <button
+              onClick={async () => {
+                const response =
+                  await fetch(
+                    "/api/vote",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type":
+                          "application/json",
+                      },
+                      body: JSON.stringify({
+                        trendId:
+                          trend.id,
+                        voteType:
+                          "downvote",
+                      }),
+                    }
+                  );
+
+                if (!response.ok) {
+                  toast.error(
+                    "Unable to record vote."
+                  );
+                  return;
+                }
+
+                toast.success(
+                  "Vote recorded!"
+                );
+              }}
+              className="bg-red-600 hover:bg-red-700 px-5 py-3 rounded-xl"
+            >
+              👎 Downvote
+            </button>
+
+          </div>
+
+          <div className="glass p-6 mb-6">
+
+            <div className="flex justify-between items-center">
+
+              <h2 className="text-3xl font-bold">
+                AI Startup Idea
+              </h2>
 
               <button
-  onClick={downloadPDF}
-  className="
-    bg-purple-600
-    px-4 py-2
-    rounded-xl
-    shadow-[0_0_20px_rgba(168,85,247,0.35)]
-  "
->
-  Download PDF
-</button>
+                onClick={generateIdea}
+                disabled={loadingIdea}
+                className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl disabled:opacity-50"
+              >
+                {loadingIdea
+                  ? "Generating..."
+                  : "Generate Startup Idea"}
+              </button>
 
-<button
-  className="
-    bg-blue-600
-    px-4 py-2
-    rounded-xl
-  "
->
-  Share
-</button>
-
-<button
-  className="
-    bg-slate-700
-    px-4 py-2
-    rounded-xl
-  "
->
-  Copy Link
-</button>
-
-<button
-  className="
-    bg-green-600
-    px-4 py-2
-    rounded-xl
-  "
->
-  Print
-</button>
-
-<button
-  className="
-    bg-yellow-600
-    px-4 py-2
-    rounded-xl
-  "
->
-  ⭐ Bookmark
-</button>
-
-{isPro && (
-  <button
-    onClick={generatePremiumReport}
-    className="
-      bg-cyan-600
-      px-4 py-2
-      rounded-xl
-      shadow-[0_0_20px_rgba(6,182,212,0.35)]
-    "
-  >
-    {loadingReport
-      ? "Generating..."
-      : "Premium Report"}
-  </button>
-)}
             </div>
+
+            {trend.startup_idea ? (
+
+              <div className="mt-6 space-y-8">
+
+              <div>
+
+                <h3 className="text-xl font-semibold mb-2">
+                  Startup Idea
+                </h3>
+
+                <p className="text-slate-300 whitespace-pre-wrap">
+                  {trend.startup_idea}
+                </p>
+
+              </div>
+
+              <div>
+
+                <h3 className="text-xl font-semibold mb-2">
+                  Market Analysis
+                </h3>
+
+                <p className="text-slate-300 whitespace-pre-wrap">
+                  {trend.market_analysis}
+                </p>
+
+              </div>
+
+              <div>
+
+                <h3 className="text-xl font-semibold mb-2">
+                  Competitors
+                </h3>
+
+                <p className="text-slate-300 whitespace-pre-wrap">
+                  {trend.competitors}
+                </p>
+
+              </div>
+
+              <div>
+
+                <h3 className="text-xl font-semibold mb-2">
+                  Risks
+                </h3>
+
+                <p className="text-slate-300 whitespace-pre-wrap">
+                  {trend.risks}
+                </p>
+
+              </div>
+
+            </div>
+
+          ) : (
+
+            <p className="text-slate-500 mt-6">
+              No startup idea generated yet.
+            </p>
+
+          )}
+
           </div>
 
-          <div
-            className="
-              px-5 py-3
-              rounded-full
-              bg-green-500/20
-              border border-green-500/20
-              text-green-300
-              text-2xl
-              font-bold
-            "
-          >
-            Score: {trend.score}
-          </div>
+          {isPro ? (
+
+            <div className="glass p-6 mb-6">
+
+              <h2 className="text-3xl font-bold mb-6">
+                Premium Investment Report
+              </h2>
+
+              {trend.premium_report ? (
+
+                <div className="whitespace-pre-wrap leading-8 text-slate-300">
+                  {trend.premium_report}
+                </div>
+
+              ) : (
+
+                <p className="text-slate-500">
+                  Click "Premium Report" to generate an investment report.
+                </p>
+
+              )}
+
+            </div>
+
+          ) : (
+
+            <UpgradePrompt />
+
+          )}
+
+          <TrendHistoryChart
+            data={history}
+          />
+
         </div>
 
-        <div className="mb-6">
-          <span
-            className="
-              px-4 py-2
-              rounded-full
-              bg-blue-500/20
-              text-blue-300
-              border border-blue-500/20
-            "
-          >
-            {trend.category}
-          </span>
-        </div>
-
-        <div className="flex gap-4 mb-6">
-          <button
-            onClick={async () => {
-              await fetch(
-                "/api/vote",
-                {
-                  method:
-                    "POST",
-                  headers: {
-                    "Content-Type":
-                      "application/json",
-                  },
-                  body: JSON.stringify({
-                    trendId:
-                      trend.id,
-                    voteType:
-                      "upvote",
-                  }),
-                }
-              );
-
-              alert(
-                "Upvoted!"
-              );
-            }}
-            className="
-              bg-green-600
-              px-4 py-2
-              rounded-xl
-              shadow-[0_0_20px_rgba(34,197,94,0.35)]
-            "
-          >
-            👍 Upvote
-          </button>
-
-          <button
-            onClick={async () => {
-              await fetch(
-                "/api/vote",
-                {
-                  method:
-                    "POST",
-                  headers: {
-                    "Content-Type":
-                      "application/json",
-                  },
-                  body: JSON.stringify({
-                    trendId:
-                      trend.id,
-                    voteType:
-                      "downvote",
-                  }),
-                }
-              );
-
-              alert(
-                "Downvoted!"
-              );
-            }}
-            className="
-              bg-red-600
-              px-4 py-2
-              rounded-xl
-              shadow-[0_0_20px_rgba(239,68,68,0.35)]
-            "
-          >
-            👎 Downvote
-          </button>
-        </div>
-
-        <div className="glass p-6 mb-6">
-          <h2 className="text-2xl font-bold mb-2">
-            Description
-          </h2>
-
-          <p>
-            {trend.description}
-          </p>
-        </div>
-
-        <div className="glass p-6">
-          <h2 className="text-2xl font-bold mb-2">
-            Why This Trend
-            Matters
-          </h2>
-
-          {!trend.startup_idea && (
-  <>
-    {isPro ? (
-      <button
-        onClick={generateIdea}
-        disabled={loadingIdea}
-        className="
-          mt-6
-          bg-blue-600
-          px-6 py-3
-          rounded-xl
-          shadow-[0_0_20px_rgba(59,130,246,0.35)]
-        "
-      >
-        {loadingIdea
-          ? "Generating..."
-          : "Generate Startup Ideas"}
-      </button>
-    ) : (
-      <UpgradePrompt />
-    )}
-  </>
-)}
-
-<p>
-  {trend.reason || "Analysis coming soon."}
-</p>
-      
-       {trend.premium_report && (
-      <div className="glass p-6 mt-6">
-        <h2 className="text-2xl font-bold mb-4 text-cyan-400">
-          Premium Startup Report
-        </h2>
-
-        <div
-  className="prose prose-invert max-w-none"
-  dangerouslySetInnerHTML={{
-    __html: trend.premium_report
-      .replace(/^### (.*)$/gm, "<h3>$1</h3>")
-.replace(/^## (.*)$/gm, "<h2>$1</h2>")
-.replace(/^# (.*)$/gm, "<h1>$1</h1>")
-.replace(/\n/g, "<br/>")
-  }}
-/>
       </div>
-    )}
 
-{trend.startup_idea && (
-  <>
-    <div className="glass p-6 mt-6">
-      <h2 className="text-2xl font-bold mb-4">
-        Startup Opportunity
-      </h2>
-
-      <pre className="whitespace-pre-wrap">
-        {trend.startup_idea}
-      </pre>
-    </div>
-
-    <div className="glass p-6 mt-6">
-      <h2 className="text-2xl font-bold mb-4">
-        Market Analysis
-      </h2>
-
-      <p>{trend.market_analysis}</p>
-    </div>
-
-    <div className="glass p-6 mt-6">
-      <h2 className="text-2xl font-bold mb-4">
-        Competitors
-      </h2>
-
-      <p>{trend.competitors}</p>
-    </div>
-
-    <div className="glass p-6 mt-6">
-      <h2 className="text-2xl font-bold mb-4">
-        Risks
-      </h2>
-      
-            <p>{trend.risks}</p>
-            
-    </div>
-  </>
-)}
-
-{history.length > 0 && (
-  <TrendHistoryChart data={history} />
-)}
-
-        </div>
-      </div>
     </main>
-   
   );
 }

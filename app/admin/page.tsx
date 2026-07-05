@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 type GeneratedTrend = {
   title: string;
@@ -17,6 +19,9 @@ export default function AdminPage() {
   const [generatedTrends, setGeneratedTrends] =
     useState<GeneratedTrend[]>([]);
 
+    const [checkingAuth, setCheckingAuth] =
+  useState(true);
+
     const categories = [
   "All",
   ...new Set(
@@ -27,12 +32,32 @@ export default function AdminPage() {
 ];
 
   useEffect(() => {
-    const admin = localStorage.getItem("admin");
+  async function checkAdmin() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!admin) {
-      router.push("/login");
+    if (!user) {
+      router.replace("/login");
+      return;
     }
-  }, [router]);
+
+    const { data } = await supabase
+      .from("admins")
+      .select("email")
+      .eq("email", user.email)
+      .single();
+
+    if (!data) {
+      router.replace("/");
+      return;
+    }
+
+    setCheckingAuth(false);
+  }
+
+  checkAdmin();
+}, [router]);
 
   async function sendNewsletter() {
     try {
@@ -43,13 +68,13 @@ export default function AdminPage() {
       const result = await response.json();
 
       if (result.success) {
-        alert("Newsletter sent!");
+        toast.success("Newsletter sent!");
       } else {
-        alert(result.error || "Failed to send newsletter");
+        toast.error(result.error || "Failed to send newsletter");
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to send newsletter");
+      toast.error("Failed to send newsletter");
     }
   }
 
@@ -62,7 +87,7 @@ export default function AdminPage() {
       const result = await response.json();
 
       if (!result.success) {
-        alert("Generation failed");
+        toast.error("Generation failed");
         return;
       }
 
@@ -81,18 +106,27 @@ export default function AdminPage() {
         }),
       });
 
-      alert(`${trends.length} trends generated and saved.`);
+      toast.success(
+  `${trends.length} trends generated and saved.`
+);
     } catch (error) {
-      console.error(error);
-      alert("Generation failed");
-    }
+  console.error(error);
+  toast.error("Generation failed");
+}
   }
 
-  function logout() {
-    localStorage.removeItem("admin");
-    router.push("/login");
-  }
+  async function logout() {
+  await supabase.auth.signOut();
+  router.push("/login");
+}
 
+  if (checkingAuth) {
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-black text-white">
+      <p className="text-xl">Checking permissions...</p>
+    </main>
+  );
+}
   return (
     <main className="min-h-screen bg-black text-white p-10">
       <div className="max-w-5xl mx-auto">
@@ -140,12 +174,12 @@ Generate AI Trends
 
   <div className="glass p-6 rounded-2xl">
     <p className="text-slate-400 text-sm">
-      Categories
-    </p>
+  Categories
+</p>
 
-    <h3 className="text-4xl font-bold mt-2">
-      {generatedTrends.length}
-    </h3>
+<h3 className="text-4xl font-bold mt-2">
+  {categories.length - 1}
+</h3>
   </div>
 
   <div className="glass p-6 rounded-2xl">

@@ -15,8 +15,7 @@ export async function POST(request: Request) {
 
     // ------------------------------------------------------------------
     // TODO:
-    // Add Dodo webhook signature verification here before production.
-    // Docs:
+    // Add Dodo webhook signature verification before production.
     // https://docs.dodopayments.com/developer-resources/webhooks
     // ------------------------------------------------------------------
 
@@ -71,6 +70,12 @@ export async function POST(request: Request) {
       payload?.data?.status ??
       "active";
 
+    const subscriptionExpiresAt =
+      payload?.data?.subscription?.current_period_end ??
+      payload?.data?.current_period_end ??
+      payload?.data?.expires_at ??
+      null;
+
     //-------------------------------------------------------------------
     // Upgrade Events
     //-------------------------------------------------------------------
@@ -93,6 +98,10 @@ export async function POST(request: Request) {
       "payment.failed",
     ];
 
+    //-------------------------------------------------------------------
+    // Upgrade User
+    //-------------------------------------------------------------------
+
     if (upgradeEvents.includes(event)) {
       console.log("Upgrading user:", email);
 
@@ -104,6 +113,7 @@ export async function POST(request: Request) {
           subscription_status: subscriptionStatus,
           dodo_customer_id: customerId,
           dodo_subscription_id: subscriptionId,
+          subscription_expires_at: subscriptionExpiresAt,
         })
         .eq("email", email);
 
@@ -129,11 +139,11 @@ export async function POST(request: Request) {
     }
 
     //-------------------------------------------------------------------
-    // Downgrade
+    // Downgrade User
     //-------------------------------------------------------------------
 
     if (downgradeEvents.includes(event)) {
-      console.log("Downgrading:", email);
+      console.log("Downgrading user:", email);
 
       await downgradeUser(email);
 
@@ -141,6 +151,7 @@ export async function POST(request: Request) {
         .from("profiles")
         .update({
           subscription_status: subscriptionStatus,
+          subscription_expires_at: null,
         })
         .eq("email", email);
 
@@ -166,7 +177,7 @@ export async function POST(request: Request) {
     }
 
     //-------------------------------------------------------------------
-    // Ignore everything else
+    // Ignore Unknown Events
     //-------------------------------------------------------------------
 
     console.log("Ignoring event:", event);

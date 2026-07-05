@@ -4,17 +4,36 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const [email, setEmail] = useState("");
+
   const [plan, setPlan] = useState("free");
+
   const [favorites, setFavorites] = useState(0);
 
-  // Temporary values
-  const [usageToday] = useState(0);
-  const [startupIdeasRemaining] = useState(3);
-  const [premiumReportsRemaining] = useState(1);
-  const [subscriptionExpiry] = useState("Unlimited");
+  const [usageToday, setUsageToday] = useState(0);
+
+  const [
+    startupIdeasRemaining,
+    setStartupIdeasRemaining,
+  ] = useState(0);
+
+  const [
+    premiumReportsRemaining,
+    setPremiumReportsRemaining,
+  ] = useState(0);
+
+  const [
+    subscriptionExpiry,
+    setSubscriptionExpiry,
+  ] = useState("N/A");
+
+  const [
+    subscriptionStatus,
+    setSubscriptionStatus,
+  ] = useState("Inactive");
 
   const loadProfile = useCallback(async () => {
     const {
@@ -27,12 +46,42 @@ export default function ProfilePage() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("plan, subscription_expires")
+      .select(
+        "plan, subscription_expires, subscription_status"
+      )
       .eq("email", user.email)
       .single();
 
     if (profile) {
       setPlan(profile.plan);
+
+      setSubscriptionStatus(
+        profile.subscription_status ??
+          "Inactive"
+      );
+
+      if (profile.subscription_expires) {
+        setSubscriptionExpiry(
+          new Date(
+            profile.subscription_expires
+          ).toLocaleDateString()
+        );
+      }
+    }
+
+    const usageResponse = await fetch("/api/usage");
+
+    if (usageResponse.ok) {
+      const usage =
+        await usageResponse.json();
+
+      setStartupIdeasRemaining(
+        usage.startupIdeasRemaining
+      );
+
+      setPremiumReportsRemaining(
+        usage.premiumReportsRemaining
+      );
     }
 
     const { data: favs } = await supabase
@@ -41,9 +90,27 @@ export default function ProfilePage() {
       .eq("user_email", user.email);
 
     setFavorites(favs?.length ?? 0);
+
+    const today = new Date()
+      .toISOString()
+      .split("T")[0];
+
+    const { data: usageRows } =
+      await supabase
+        .from("ai_usage")
+        .select("count")
+        .eq("email", user.email)
+        .eq("usage_date", today);
+
+    setUsageToday(
+      usageRows?.reduce(
+        (sum, row) => sum + row.count,
+        0
+      ) ?? 0
+    );
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     loadProfile();
   }, [loadProfile]);
 
@@ -78,6 +145,24 @@ export default function ProfilePage() {
 
             <p className="text-xl capitalize font-semibold">
               {plan}
+            </p>
+          </div>
+
+          {/* Subscription Status */}
+
+          <div className="mb-8">
+            <p className="text-slate-400">
+              Subscription Status
+            </p>
+
+            <p
+              className={`text-xl font-semibold mt-2 ${
+                subscriptionStatus === "active"
+                  ? "text-green-400"
+                  : "text-yellow-400"
+              }`}
+            >
+              {subscriptionStatus}
             </p>
           </div>
 
@@ -155,9 +240,9 @@ export default function ProfilePage() {
 
           {/* Upgrade Button */}
 
-          {plan !== "pro" && (
-            <div className="mt-10 text-center">
+          <div className="mt-10 flex gap-4 justify-center">
 
+            {plan !== "pro" ? (
               <button
                 onClick={() => {
                   window.location.href = "/pricing";
@@ -165,18 +250,65 @@ export default function ProfilePage() {
                 className="
                   bg-blue-600
                   hover:bg-blue-700
-                  transition
                   px-8
                   py-4
                   rounded-xl
-                  font-semibold
                 "
               >
                 Upgrade to Pro
               </button>
+            ) : (
+              <button
+  onClick={async () => {
+    try {
+      const response = await fetch(
+        "/api/billing",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email,
+          }),
+        }
+      );
 
-            </div>
-          )}
+      const result =
+        await response.json();
+
+      if (!response.ok) {
+        toast.error(
+          result.error ??
+            "Unable to open billing portal."
+        );
+        return;
+      }
+
+      window.location.href =
+        result.url;
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        "Unable to open billing portal."
+      );
+    }
+  }}
+  className="
+    bg-slate-700
+    hover:bg-slate-600
+    px-8
+    py-4
+    rounded-xl
+  "
+>
+  Manage Subscription
+</button>
+            )}
+
+          </div>
 
         </div>
 
