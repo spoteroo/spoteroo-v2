@@ -127,7 +127,9 @@ const [topCategory, setTopCategory] =
       const { data: trends } =
         await supabase
           .from("trends")
-          .select("*")
+.select(
+  "id,title,description,category,score,reason"
+)
           .order("score", {
             ascending: false,
           });
@@ -187,10 +189,31 @@ const [topCategory, setTopCategory] =
         ]);
       }
 
-      const analyticsResponse = await fetch(
+     try {
+  const analyticsResponse = await fetch(
+    "/api/dashboard/analytics"
+  );
+
+  if (analyticsResponse.ok) {
+    const analytics: Analytics =
+      await analyticsResponse.json();
+
+    setSubscriberCount(analytics.subscribers);
+
+    setVotesCount(analytics.votes);
+
+    setTopCategory(
+      analytics.topCategories?.[0]?.[0] ??
+        "N/A"
+    );
+  }
+} catch (error) {
+  console.error(error);
+}
+
+const analyticsResponse = await fetch(
   "/api/dashboard/analytics"
 );
-
 if (analyticsResponse.ok) {
   const analytics =
     await analyticsResponse.json();
@@ -217,7 +240,7 @@ if (analyticsResponse.ok) {
       const { data: usageRows } =
         await supabase
           .from("ai_usage")
-          .select("*")
+          .select("count")
           .eq(
             "usage_date",
             today
