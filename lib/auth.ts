@@ -1,30 +1,22 @@
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/server";
 
 export async function requireUser() {
-  const cookieStore = await cookies();
+  const supabase = await createClient();
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll() {},
-      },
-    }
-  );
+ const {
+  data: { user },
+  error,
+} = await supabase.auth.getUser();
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+console.log("========== AUTH DEBUG ==========");
+console.log("User:", user);
+console.log("Error:", error);
+console.log("Email:", user?.email);
+console.log("================================");
 
-  if (error || !user?.email) {
-    throw new Error("Unauthorized");
-  }
+if (error || !user?.email) {
+  throw new Error("Unauthorized");
+}
 
   return {
     user,
