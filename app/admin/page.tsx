@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 type GeneratedTrend = {
@@ -14,6 +14,8 @@ type GeneratedTrend = {
 };
 
 export default function AdminPage() {
+  const supabase = createClient();
+  
   const router = useRouter();
 
   const [generatedTrends, setGeneratedTrends] =

@@ -25,7 +25,6 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh the auth session if needed
   await supabase.auth.getUser();
 
   return response;

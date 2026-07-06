@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 import DashboardHeader from "./components/DashboardHeader";
 import BusinessMetrics from "./components/BusinessMetrics";
@@ -46,6 +46,8 @@ type Analytics = {
 const ITEMS_PER_PAGE = 10;
 
 export default function DashboardPage() {
+  const supabase = createClient();
+
   const router = useRouter();
 
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -106,19 +108,30 @@ const [topCategory, setTopCategory] =
     >([]);
 
   useEffect(() => {
-    async function loadDashboard() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  async function loadDashboard() {
+    console.log("1. Dashboard started");
 
-      if (!user) {
-        router.push("/login");
-        return;
-      }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      setCheckingAuth(false);
+    console.log("2. Current user:", user);
 
-      const usageResponse = await fetch("/api/usage");
+    if (!user) {
+      console.log("3. No user found");
+      router.push("/login");
+      return;
+    }
+
+    console.log("4. User authenticated");
+
+    setCheckingAuth(false);
+
+    console.log("5. Fetching /api/usage");
+
+    const usageResponse = await fetch("/api/usage");
+
+    console.log("6. /api/usage status:", usageResponse.status);
 
       if (usageResponse.ok) {
         setUsage(await usageResponse.json());

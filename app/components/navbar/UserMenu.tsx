@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "../../../lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 export default function UserMenu() {
+  const supabase = createClient();
+  
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
