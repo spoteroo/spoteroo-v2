@@ -14,14 +14,21 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      await supabase.auth.signInWithOtp({
-        email,
-        options: {
-  emailRedirectTo: `${window.location.origin}/auth/callback`,
-},
-      });
+      const { data, error } = await supabase.auth.signInWithOtp({
+  email,
+  options: {
+    emailRedirectTo: `${window.location.origin}/auth/callback`,
+  },
+});
 
-      setSent(true);
+console.log("OTP DATA:", data);
+console.log("OTP ERROR:", error);
+
+if (error) {
+  throw error;
+}
+
+setSent(true);
     } catch (error) {
       console.error(error);
     } finally {
