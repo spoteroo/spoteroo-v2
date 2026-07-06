@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { supabase } from "../../../lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import UpgradePrompt from "@/app/components/UpgradePrompt";
 import TrendHistoryChart from "@/app/components/charts/TrendHistoryChart";
 import { toast } from "sonner";
@@ -46,6 +46,8 @@ type HistoryPoint = {
 };
 
 export default function TrendDetailPage() {
+  const supabase = createClient();
+
   const params = useParams();
 
   const id = Number(
@@ -73,10 +75,33 @@ export default function TrendDetailPage() {
 
   useEffect(() => {
     async function loadTrend() {
+      console.log("🚀 loadTrend started");
       const { data, error } =
         await supabase
           .from("trends")
-          .select("*")
+          .select(`
+  id,
+  title,
+  description,
+  category,
+  score,
+  reason,
+  startup_idea,
+  market_analysis,
+  competitors,
+  risks,
+  premium_report,
+  opportunity_score,
+  momentum,
+  investment_rating,
+  competition_level,
+  market_size,
+  forecast_30d,
+  forecast_90d,
+  forecast_1y,
+  success_probability,
+  unicorn_potential
+`)
           .eq("id", id)
           .single();
 
@@ -92,39 +117,43 @@ export default function TrendDetailPage() {
 
       setTrend(data);
 
-      const historyResponse =
-        await fetch(
-          `/api/trends/${id}/history`
-        );
+      try {
+  const response = await fetch(
+    `/api/trends/${id}/history`
+  );
 
-      if (historyResponse.ok) {
-        setHistory(
-          await historyResponse.json()
-        );
-      }
+  if (response.ok) {
+    const historyData = await response.json();
+
+    setHistory(historyData);
+  }
+} catch (error) {
+  console.error(error);
+}
 
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
+      
+
       if (!user) return;
 
-      const { data: profile } =
-        await supabase
-          .from("profiles")
-          .select("plan")
-          .eq("id", user.id)
-          .single();
+      const { data: profile } = await supabase
+  .from("profiles")
+  .select("plan")
+  .eq("email", user.email)
+  .maybeSingle();
 
-      setIsPro(
-        profile?.plan === "pro"
-      );
+setIsPro(profile?.plan === "pro");
+
+  
     }
 
     if (id) {
       loadTrend();
     }
-  }, [id]);
+  }, [id, supabase]);
 
   const downloadPDF = () => {
     if (!trend) return;
@@ -179,6 +208,29 @@ export default function TrendDetailPage() {
       }
     );
 
+    doc.addPage();
+
+doc.setFontSize(16);
+
+doc.text(
+  "Premium Report",
+  20,
+  20
+);
+
+doc.setFontSize(11);
+
+doc.text(
+  trend.premium_report ??
+    "No premium report generated.",
+  20,
+  40,
+  {
+    maxWidth: 170,
+    align: "left",
+  }
+);
+
     doc.save(
       `${trend.title}-report.pdf`
     );
@@ -225,6 +277,7 @@ export default function TrendDetailPage() {
           .select("*")
           .eq("id", trend.id)
           .single();
+          console.log("✅ Trend loaded", data);
 
       if (data) {
         setTrend(data);
@@ -457,7 +510,9 @@ export default function TrendDetailPage() {
             </button>
 
             <button
-              onClick={() => window.print()}
+              onClick={() => {
+  window.print();
+}}
               className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl"
             >
               Print
@@ -501,62 +556,47 @@ export default function TrendDetailPage() {
             </button>
 
                         <button
-              onClick={async () => {
-                const {
-                  data: { user },
-                } = await supabase.auth.getUser();
+  onClick={async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-                if (!user?.email) {
-                  toast.error("Please login first");
-                  return;
-                }
 
-                const { data: existing } =
-                  await supabase
-                    .from("favorites")
-                    .select("id")
-                    .eq(
-                      "user_email",
-                      user.email
-                    )
-                    .eq(
-                      "trend_id",
-                      trend.id
-                    )
-                    .maybeSingle();
+    if (!user?.email) {
+      toast.error("Please login first");
+      return;
+    }
 
-                if (existing) {
-                  toast.info(
-                    "Already saved!"
-                  );
-                  return;
-                }
+    const { data: existing } = await supabase
+      .from("favorites")
+      .select("id")
+      .eq("user_email", user.email)
+      .eq("trend_id", trend.id)
+      .maybeSingle();
 
-                const { error } =
-                  await supabase
-                    .from("favorites")
-                    .insert({
-                      user_email:
-                        user.email,
-                      trend_id:
-                        trend.id,
-                    });
+    if (existing) {
+      toast.info("Already saved!");
+      return;
+    }
 
-                if (error) {
-                  toast.error(
-                    error.message
-                  );
-                  return;
-                }
+    const { error } = await supabase
+  .from("favorites")
+  .insert({
+    trend_id: trend.id,
+    user_email: user.email,
+  });
 
-                toast.success(
-                  "Trend saved!"
-                );
-              }}
-              className="bg-yellow-600 hover:bg-yellow-700 px-5 py-3 rounded-xl"
-            >
-              ⭐ Save Trend
-            </button>
+if (error) {
+  toast.error(error.message);
+  return;
+}
+
+toast.success("Trend saved!");
+  }}
+  className="bg-yellow-600 hover:bg-yellow-700 px-5 py-3 rounded-xl"
+>
+  ⭐ Save Trend
+</button>
 
             {isPro && (
               <button
@@ -615,71 +655,81 @@ export default function TrendDetailPage() {
           <div className="flex gap-4 mb-8">
 
             <button
-              onClick={async () => {
-                const response =
-                  await fetch(
-                    "/api/vote",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type":
-                          "application/json",
-                      },
-                      body: JSON.stringify({
-                        trendId:
-                          trend.id,
-                        voteType:
-                          "upvote",
-                      }),
-                    }
-                  );
+  onClick={async () => {
+    const response = await fetch(
+      "/api/vote",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          trendId: trend.id,
+          voteType: "upvote",
+        }),
+      }
+    );
 
-                if (!response.ok) {
-                  toast.error(
-                    "Unable to record vote."
-                  );
-                  return;
-                }
+    if (!response.ok) {
+      toast.error("Unable to record vote.");
+      return;
+    }
 
-                toast.success(
-                  "Thanks for your vote!"
-                );
-              }}
-              className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl"
-            >
-              👍 Upvote
-            </button>
+    const { data: refreshedTrend } =
+      await supabase
+        .from("trends")
+        .select("score")
+        .eq("id", trend.id)
+        .single();
+
+    if (refreshedTrend) {
+      setTrend({
+        ...trend,
+        score: refreshedTrend.score,
+      });
+    }
+
+    toast.success("Thanks for your vote!");
+  }}
+  className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl"
+>
+  👍 Upvote
+</button>
+                
 
             <button
               onClick={async () => {
-                const response =
-                  await fetch(
-                    "/api/vote",
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type":
-                          "application/json",
-                      },
-                      body: JSON.stringify({
-                        trendId:
-                          trend.id,
-                        voteType:
-                          "downvote",
-                      }),
-                    }
-                  );
+                const response = await fetch("/api/vote", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    trendId: trend.id,
+    voteType: "downvote",
+  }),
+});
 
-                if (!response.ok) {
-                  toast.error(
-                    "Unable to record vote."
-                  );
-                  return;
-                }
+if (!response.ok) {
+  toast.error("Unable to record vote.");
+  return;
+}
 
-                toast.success(
-                  "Vote recorded!"
-                );
+const { data: refreshedTrend } =
+  await supabase
+    .from("trends")
+    .select("score")
+    .eq("id", trend.id)
+    .single();
+
+if (refreshedTrend) {
+  setTrend({
+    ...trend,
+    score: refreshedTrend.score,
+  });
+}
+
+toast.success("Vote recorded!");
               }}
               className="bg-red-600 hover:bg-red-700 px-5 py-3 rounded-xl"
             >
