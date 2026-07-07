@@ -1,5 +1,54 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Discover Emerging Startup Opportunities with AI",
+
+  description:
+    "Spoteroo helps founders, investors, and builders discover emerging startup opportunities, AI trends, market intelligence, startup ideas, and high-growth technologies before they become mainstream.",
+
+  keywords: [
+    "startup opportunities",
+    "startup ideas",
+    "AI startup ideas",
+    "market trends",
+    "emerging technologies",
+    "business opportunities",
+    "startup intelligence",
+    "AI trend discovery",
+    "innovation",
+    "future startups",
+  ],
+
+  alternates: {
+    canonical: "https://spoteroo.com",
+  },
+
+  openGraph: {
+    title: "Spoteroo — Discover Emerging Startup Opportunities",
+    description:
+      "AI-powered opportunity intelligence platform for founders, investors, and builders.",
+
+    url: "https://spoteroo.com",
+
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Spoteroo",
+      },
+    ],
+  },
+
+  twitter: {
+    title: "Spoteroo — Discover Emerging Startup Opportunities",
+    description:
+      "Discover startup ideas, AI trends and market opportunities before everyone else.",
+    images: ["/og-image.png"],
+  },
+};
 
 export default async function Home() {
   const supabase = await createClient();
@@ -46,8 +95,11 @@ const categoryCount = new Set(
         <div className="text-center mb-24">
           <h1
             className="
-              text-7xl
-              md:text-8xl
+              text-4xl
+lg:text-5xl
+sm:text-6xl
+lg:text-7xl
+xl:text-8xl
               font-extrabold
               bg-gradient-to-r
               from-white
@@ -63,7 +115,9 @@ const categoryCount = new Set(
             Opportunities Today
           </h1>
 
-          <p className="text-2xl text-slate-300 mb-6">
+          <p className="text-lg
+sm:text-xl
+lg:text-2xl text-slate-300 mb-6">
             Discover emerging startup trends before everyone else.
           </p>
 
@@ -112,7 +166,9 @@ const categoryCount = new Set(
         <div className="grid md:grid-cols-3 gap-6 mb-24">
           
           <div className="glass p-8 text-center">
-            <h3 className="text-5xl font-bold text-white">
+            <h3 className="
+lg:text-4xl
+lg:text-5xl font-bold text-white">
               {trendCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
@@ -121,7 +177,8 @@ const categoryCount = new Set(
           </div>
 
           <div className="glass p-8 text-center">
-            <h3 className="text-5xl font-bold text-white">
+            <h3 className="text-4xl
+lg:text-5xl font-bold text-white">
               {subscriberCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
@@ -130,7 +187,8 @@ const categoryCount = new Set(
           </div>
 
           <div className="glass p-8 text-center">
-            <h3 className="text-5xl font-bold text-white">
+            <h3 className="text-4xl
+lg:text-5xl font-bold text-white">
               {favoriteCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
@@ -146,7 +204,9 @@ const categoryCount = new Set(
 </h2>
         <div className="grid md:grid-cols-3 gap-6 mb-24">
           <div className="glass p-8">
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-lg
+sm:text-xl
+lg:text-2xl font-bold mb-4">
               🔍 Trend Discovery
             </h3>
 
@@ -157,7 +217,9 @@ const categoryCount = new Set(
           </div>
 
           <div className="glass p-8">
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-lg
+sm:text-xl
+lg:text-2xl font-bold mb-4">
               💡 Startup Ideas
             </h3>
 
@@ -168,7 +230,9 @@ const categoryCount = new Set(
           </div>
 
           <div className="glass p-8">
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-lg
+sm:text-xl
+lg:text-2xl font-bold mb-4">
               📈 Market Analysis
             </h3>
 
@@ -185,7 +249,8 @@ const categoryCount = new Set(
   Latest AI Generated Trend
 </p>
         <section className="mb-24">
-          <h2 className="text-5xl font-bold mb-10">
+          <h2 className="text-4xl
+lg:text-5xl font-bold mb-10">
             Top Trends
           </h2>
 
@@ -205,9 +270,15 @@ const categoryCount = new Set(
                     hover:-translate-y-1
                   "
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex
+flex-col
+sm:flex-row
+justify-between
+gap-4">
                     <div>
-                      <h3 className="text-2xl font-bold">
+                      <h3 className="text-lg
+sm:text-xl
+lg:text-2xl font-bold">
                         {trend.title}
                       </h3>
 
@@ -243,7 +314,20 @@ const categoryCount = new Set(
         <div className="mt-10 text-center mb-24">
   <Link
     href="/trends"
-    className="glass px-8 py-4 rounded-xl font-semibold"
+    className="
+glass
+inline-flex
+items-center
+justify-center
+w-full
+sm:w-auto
+px-8
+py-4
+rounded-xl
+font-semibold
+transition
+hover:scale-105
+"
   >
     View All Trends →
   </Link>
@@ -254,7 +338,8 @@ const categoryCount = new Set(
         {/* CUSTOMER TESTIMONIALS */}
 
 <section className="mb-24">
-  <h2 className="text-5xl font-bold mb-10 text-center">
+  <h2 className="text-4xl
+lg:text-5xl font-bold mb-10 text-center">
     Loved by Founders
   </h2>
 
@@ -337,7 +422,8 @@ const categoryCount = new Set(
 
   <div className="glass p-10 text-center">
 
-    <h2 className="text-5xl font-bold mb-4">
+    <h2 className="text-4xl
+lg:text-5xl font-bold mb-4">
       Upgrade to Pro
     </h2>
 
@@ -367,7 +453,8 @@ const categoryCount = new Set(
 
 <section className="mb-24">
 
-  <h2 className="text-5xl font-bold mb-10">
+  <h2 className="text-4xl
+lg:text-5xl font-bold mb-10">
     Frequently Asked Questions
   </h2>
 
@@ -412,7 +499,7 @@ const categoryCount = new Set(
 </section>
         <section className="glass p-12 text-center">
 
-  <h2>
+  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
     Ready to discover the next
     billion-dollar opportunity?
   </h2>

@@ -125,7 +125,7 @@ export async function incrementUsage(
     if (insertError) {
       console.error("AI Usage Insert Error:", insertError);
     } else {
-      console.log("AI Usage Inserted Successfully");
+
     }
 
     return;
@@ -141,6 +141,5 @@ export async function incrementUsage(
   if (updateError) {
     console.error("AI Usage Update Error:", updateError);
   } else {
-    console.log("AI Usage Updated Successfully");
   }
 }

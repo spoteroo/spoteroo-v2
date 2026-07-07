@@ -40,35 +40,48 @@ export default function PricingPage() {
   }
 
   return (
-    <main className="min-h-screen max-w-6xl mx-auto p-10 text-white">
+    <main className="min-h-screen max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-10 text-white">
 
       {/* Hero */}
 
       <section className="text-center mb-16">
-        <h1 className="text-6xl font-bold mb-6">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
           Spoteroo Pro
         </h1>
 
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+        <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto">
           Unlock unlimited AI startup ideas,
           premium reports, market analysis,
           and advanced opportunity discovery.
         </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-slate-300">
+  <span className="glass px-4 py-2 rounded-full">
+    ✓ Cancel Anytime
+  </span>
+
+  <span className="glass px-4 py-2 rounded-full">
+    ✓ Secure Payments
+  </span>
+
+  <span className="glass px-4 py-2 rounded-full">
+    ✓ Instant Access
+  </span>
+</div>
       </section>
 
       {/* Pricing Cards */}
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* Monthly */}
 
         <div className="glass rounded-2xl p-8 border border-slate-700">
 
-          <h2 className="text-3xl font-bold">
+          <h2 className="text-2xl sm:text-3xl font-bold">
             Monthly
           </h2>
 
-          <p className="text-5xl font-bold mt-5">
+          <p className="text-4xl sm:text-5xl font-bold mt-5">
             $49
             <span className="text-lg text-slate-400">
               /month
@@ -110,15 +123,15 @@ export default function PricingPage() {
 
         <div className="glass rounded-2xl p-8 border border-green-600 relative">
 
-          <div className="absolute top-5 right-5 bg-green-600 rounded-full px-4 py-1 text-sm">
+          <div className="absolute top-4 right-4 rounded-full bg-green-600 px-3 py-1 text-xs sm:px-4 sm:text-sm">
             Best Value
           </div>
 
-          <h2 className="text-3xl font-bold">
+          <h2 className="text-2xl sm:text-3xl font-bold">
             Yearly
           </h2>
 
-          <p className="text-5xl font-bold mt-5">
+          <p className="text-4xl sm:text-5xl font-bold mt-5">
             $490
             <span className="text-lg text-slate-400">
               /year
@@ -166,13 +179,13 @@ export default function PricingPage() {
 
       <section className="mt-24">
 
-        <h2 className="text-4xl font-bold text-center mb-10">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10">
           Feature Comparison
         </h2>
 
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="glass rounded-2xl overflow-x-auto">
 
-          <table className="w-full">
+          <table className="min-w-[600px] w-full">
 
             <thead className="bg-slate-800">
 
@@ -256,7 +269,7 @@ export default function PricingPage() {
 
       <section className="mt-24">
 
-        <h2 className="text-4xl font-bold text-center mb-10">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10">
           Frequently Asked Questions
         </h2>
 
@@ -300,11 +313,11 @@ export default function PricingPage() {
 
       <section className="mt-24">
 
-        <h2 className="text-4xl font-bold text-center mb-10">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10">
           What Early Users Say
         </h2>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           <div className="glass p-6 rounded-xl">
             <p className="italic text-slate-300">
@@ -344,7 +357,7 @@ export default function PricingPage() {
 
       <section className="mt-20">
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <div className="glass rounded-xl p-6 text-center">
             🛡️ 30-Day Money Back Guarantee

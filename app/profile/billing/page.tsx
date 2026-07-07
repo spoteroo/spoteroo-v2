@@ -56,18 +56,18 @@ const daysRemaining = renewalDate
   : null;
 
 return (
-<main className="min-h-screen bg-black text-white px-6 py-10">
+<main className="min-h-screen bg-black text-white px-4 py-8 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-6xl space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-5xl font-bold">Billing Center</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">Billing Center</h1>
           <p className="mt-3 text-slate-400 text-lg">
             Manage your subscription, usage, and billing information.
           </p>
         </div>
 
         {/* Top Grid */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Subscription Card */}
           <div className="glass rounded-3xl p-8">
             <div className="flex items-center justify-between">
@@ -87,9 +87,18 @@ return (
             <div className="mt-8 space-y-5">
               <div>
                 <p className="text-sm text-slate-400">Current Plan</p>
-                <p className="text-3xl font-bold mt-1">
+                <span
+  className={`
+    mt-2 inline-block rounded-full px-4 py-2 text-sm font-semibold
+    ${
+      profile?.plan === "pro"
+        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+        : "bg-slate-700 text-slate-300 border border-slate-600"
+    }
+  `}
+>
   {profile?.plan?.toUpperCase() ?? "FREE"}
-</p>
+</span>
               </div>
 
               <div>
@@ -122,15 +131,36 @@ return (
   </p>
 </div>
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link
                   href="/pricing"
-                  className="rounded-xl bg-cyan-500 px-5 py-3 font-semibold transition hover:bg-cyan-400"
+                  className="
+w-full
+sm:w-auto
+rounded-xl
+bg-cyan-500
+px-5
+py-3
+font-semibold
+transition
+hover:bg-cyan-400
+"
                 >
                   Upgrade Plan
                 </Link>
 
-                <button className="rounded-xl border border-slate-700 px-5 py-3 font-semibold hover:border-cyan-400">
+                <button className="
+w-full
+sm:w-auto
+rounded-xl
+border
+border-slate-700
+px-5
+py-3
+font-semibold
+transition
+hover:border-cyan-400
+">
                   Manage
                 </button>
               </div>
@@ -170,7 +200,7 @@ return (
             Included with Pro
           </h2>
 
-          <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <Feature text="Unlimited Startup Ideas" />
             <Feature text="Unlimited Premium Reports" />
             <Feature text="Advanced Trend Discovery" />
@@ -196,7 +226,7 @@ return (
   </div>
 
   <div className="mt-8 overflow-x-auto">
-    <table className="w-full">
+    <table className="min-w-[700px] w-full">
       <thead>
         <tr className="border-b border-slate-800 text-left text-slate-400">
           <th className="pb-4">Invoice</th>
@@ -287,7 +317,7 @@ const percent = unlimited
 
   return (
     <div>
-      <div className="mb-2 flex justify-between text-sm">
+      <div className="mb-2 flex flex-wrap justify-between gap-2 text-sm">
         <span>{title}</span>
         <span className="text-slate-400">
           {unlimited ? "Unlimited" : `${used}/${total}`}

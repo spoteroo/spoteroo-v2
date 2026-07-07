@@ -20,31 +20,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://spoteroo.com"),
-  alternates: {
-  canonical: "/",
-},
 
   title: {
-    default: "Spoteroo | Discover Emerging Startup Opportunities",
+    default: "Spoteroo — Discover Emerging Startup Opportunities with AI",
     template: "%s | Spoteroo",
   },
 
   description:
-    "Spoteroo is an AI-powered opportunity intelligence platform that helps founders, investors, creators, and businesses discover emerging startup trends, technologies, markets, and opportunities before they become mainstream.",
+    "Spoteroo is an AI-powered opportunity intelligence platform that helps founders, investors, and builders discover emerging startup ideas, market trends, technologies, and business opportunities before they become mainstream.",
 
   keywords: [
+    "startup ideas",
     "startup trends",
     "AI startup ideas",
-    "emerging markets",
-    "startup opportunities",
+    "emerging technologies",
     "business opportunities",
-    "trend discovery",
     "market intelligence",
+    "trend discovery",
     "AI trends",
+    "startup research",
+    "opportunity intelligence",
     "future startups",
-    "Spoteroo",
+    "innovation platform",
+    "market analysis",
+    "founder tools",
+    "startup validation",
   ],
 
   authors: [
@@ -56,55 +59,83 @@ export const metadata: Metadata = {
   creator: "Spoteroo",
 
   publisher: "Spoteroo",
-  applicationName: "Spoteroo",
 
-category: "Business",
+  generator: "Next.js",
 
-referrer: "origin-when-cross-origin",
+  category: "Technology",
 
-  robots: {
-  index: true,
-  follow: true,
-  nocache: false,
-  googleBot: {
-    index: true,
-    follow: true,
-    "max-image-preview": "large",
-    "max-video-preview": -1,
-    "max-snippet": -1,
-  },
+  alternates: {
+  canonical: "https://spoteroo.com",
 },
 
   openGraph: {
-    title: "Spoteroo | Discover Emerging Startup Opportunities",
-
-    description:
-      "Discover emerging startup opportunities before they become mainstream using AI-powered market intelligence.",
-
+    type: "website",
     url: "https://spoteroo.com",
 
-    siteName: "Spoteroo",
+    title: "Spoteroo — Discover Emerging Startup Opportunities with AI",
+
+    description:
+      "Discover emerging startup opportunities, AI-powered market intelligence, startup ideas, and technology trends before everyone else.",
 
     locale: "en_US",
+    
 
-    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Spoteroo",
+      },
+    ],
   },
 
   twitter: {
     card: "summary_large_image",
 
-    title: "Spoteroo",
+    title: "Spoteroo — Discover Emerging Startup Opportunities",
 
     description:
-      "AI-powered opportunity intelligence platform.",
+      "AI-powered platform for discovering startup opportunities before they become mainstream.",
 
-    creator: "@spoteroo",
+    images: ["/og-image.png"],
+    creator: "@getspoteroo",
+site: "@getspoteroo",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+      "max-snippet": -1,
+    },
+  },
+
+  applicationName: "Spoteroo",
+
+  referrer: "origin-when-cross-origin",
+
+  appleWebApp: {
+    capable: true,
+    title: "Spoteroo",
+    statusBarStyle: "black-translucent",
   },
 
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
-    apple: "/favicon.png",
+  icon: "/favicon.ico",
+  shortcut: "/favicon.ico",
+  apple: "/apple-touch-icon.png",
+},
+
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
 };
 
@@ -202,25 +233,50 @@ export default function RootLayout({
   type="application/ld+json"
   suppressHydrationWarning
   dangerouslySetInnerHTML={{
-    __html: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: "Spoteroo",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      description:
-        "AI-powered opportunity intelligence platform for discovering emerging startup trends and market opportunities.",
-      url: "https://spoteroo.com",
-      offers: {
-        "@type": "Offer",
-        price: "49",
-        priceCurrency: "USD",
-      },
-      creator: {
+    __html: JSON.stringify([
+      {
+        "@context": "https://schema.org",
         "@type": "Organization",
         name: "Spoteroo",
+        url: "https://spoteroo.com",
+        logo: "https://spoteroo.com/logo.svg",
+        sameAs: [
+  "https://x.com/getspoteroo",
+  "https://github.com/spoteroo",
+  "https://www.producthunt.com/@spoteroo",
+],
+description: "AI-powered opportunity intelligence platform.",
+foundingDate: "2026",
       },
-    }),
+      
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Spoteroo",
+        url: "https://spoteroo.com",
+        description:
+          "AI-powered opportunity intelligence platform for discovering emerging startup opportunities.",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Spoteroo",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        url: "https://spoteroo.com",
+        description:
+          "Discover emerging startup opportunities, AI-powered trend discovery, market intelligence, startup ideas, and business opportunities.",
+        offers: {
+          "@type": "Offer",
+          price: "49",
+          priceCurrency: "USD"
+        },
+        creator: {
+          "@type": "Organization",
+          name: "Spoteroo"
+        }
+      }
+    ]),
   }}
 />
 

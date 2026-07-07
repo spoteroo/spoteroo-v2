@@ -17,7 +17,6 @@ export default async function FavoritesPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  console.log("SERVER USER:", user);
 
 if (!user?.email) {
     return (
@@ -32,9 +31,6 @@ if (!user?.email) {
     .select("*")
     .eq("user_email", user.email)
     .order("created_at", { ascending: false });
-
-    console.log("SERVER FAVORITES:", favoriteRows);
-console.log("SERVER ERROR:", error);
 
   if (error) {
     console.error(error);
@@ -69,7 +65,7 @@ console.log("SERVER ERROR:", error);
       .filter((f) => f.trend);
 
           return (
-  <main className="min-h-screen text-white p-10">
+  <main className="min-h-screen text-white px-4 py-8 sm:px-6 lg:px-10">
     <div className="max-w-5xl mx-auto">
 
       <Link
@@ -82,9 +78,11 @@ console.log("SERVER ERROR:", error);
       <div className="mb-10">
 
         <h1
-          className="
-            text-6xl
-            font-bold
+  className="
+    text-4xl
+    sm:text-5xl
+    lg:text-6xl
+    font-bold
             bg-gradient-to-r
             from-white
             to-yellow-400
@@ -115,6 +113,22 @@ console.log("SERVER ERROR:", error);
           <p className="text-slate-400 mt-2">
             Save trends to see them here.
           </p>
+          <Link
+  href="/trends"
+  className="
+    inline-block
+    mt-6
+    rounded-xl
+    bg-blue-600
+    px-6
+    py-3
+    font-semibold
+    transition
+    hover:bg-blue-700
+  "
+>
+  Explore Trends
+</Link>
 
         </div>
       )}
@@ -128,7 +142,8 @@ console.log("SERVER ERROR:", error);
     <div
       className="
         glass
-        p-6
+p-5
+sm:p-6
         cursor-pointer
         transition-all
         duration-300
@@ -136,20 +151,43 @@ console.log("SERVER ERROR:", error);
         hover:border-yellow-500/30
       "
     >
-      <h2 className="text-2xl font-bold">
-        {favorite.trend.title}
-      </h2>
+      <div className="flex items-start justify-between gap-4">
+  <h2 className="text-xl sm:text-2xl font-bold">
+    {favorite.trend.title}
+  </h2>
+
+  <span
+    className="
+      whitespace-nowrap
+      rounded-full
+      bg-green-500/15
+      px-3
+      py-1
+      text-sm
+      text-green-300
+      border
+      border-green-500/20
+    "
+  >
+    {favorite.trend.score}
+  </span>
+</div>
 
       <p className="text-slate-400 mt-3">
         {favorite.trend.description}
       </p>
 
-      <p className="text-xs text-slate-500 mt-2">
-        Saved on{" "}
-        {new Date(
-          favorite.created_at
-        ).toLocaleDateString()}
-      </p>
+     <p className="mt-2 text-xs text-slate-500">
+  Saved •{" "}
+  {new Date(favorite.created_at).toLocaleDateString(
+    undefined,
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }
+  )}
+</p>
 
       <div className="flex gap-3 mt-4 flex-wrap">
         <span
@@ -167,20 +205,6 @@ console.log("SERVER ERROR:", error);
           {favorite.trend.category}
         </span>
 
-        <span
-          className="
-            px-3
-            py-1
-            rounded-full
-            bg-green-500/15
-            text-green-300
-            border
-            border-green-500/20
-            text-sm
-          "
-        >
-          Score: {favorite.trend.score}
-        </span>
       </div>
 
       <RemoveFavoriteButton id={favorite.id} />

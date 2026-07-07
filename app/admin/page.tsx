@@ -130,17 +130,24 @@ export default function AdminPage() {
   );
 }
   return (
-    <main className="min-h-screen bg-black text-white p-10">
+    <main className="min-h-screen bg-black text-white px-4 py-8 sm:px-6 lg:px-10">
       <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-5xl font-bold">
+        <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
             Admin Dashboard
           </h1>
 
 
           <button
             onClick={logout}
-            className="bg-red-600 px-4 py-2 rounded"
+            className="
+rounded-xl
+bg-red-600
+px-5
+py-3
+transition
+hover:bg-red-500
+"
           >
             Logout
           </button>
@@ -162,9 +169,14 @@ Generate AI Trends
           </button>
         </div>
 
-       <div className="grid md:grid-cols-4 gap-6 mb-8">
+       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+<p className="mb-6 text-slate-400">
+AI-generated startup opportunities ready for review and publishing.
+</p>
 
   <div className="glass p-6 rounded-2xl">
+
     <p className="text-slate-400 text-sm">
       Generated Trends
     </p>
@@ -227,13 +239,13 @@ Generate AI Trends
               {generatedTrends.map((trend, index) => (
                 <div
                   key={index}
-                  className="bg-gray-900 p-5 rounded-xl"
+                  className="glass rounded-2xl p-6"
                 >
                   <h3 className="text-xl font-bold">
                     {trend.title}
                   </h3>
 
-                  <p className="text-gray-300 mt-2">
+                  <p className="text-slate-300 mt-2">
                     {trend.description}
                   </p>
 
@@ -245,7 +257,7 @@ Generate AI Trends
                     Score: {trend.score}
                   </p>
 
-                  <p className="text-gray-500 mt-2">
+                  <p className="text-slate-400 mt-2">
                     {trend.reason}
                   </p>
                 </div>

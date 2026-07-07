@@ -62,7 +62,7 @@ useEffect(() => {
     }
 
     fetchTrends();
-  }, []);
+  }, [supabase]);
 
   const categories = [
     "All",
@@ -131,12 +131,12 @@ const paginatedTrends =
   );
 
   return (
-    <main className="min-h-screen text-white p-10">
+    <main className="min-h-screen text-white px-4 py-8 sm:px-6 lg:px-10">
       <div className="max-w-6xl mx-auto">
 
         <h1
           className="
-            text-5xl
+            text-3xl sm:text-4xl lg:text-5xl
             font-bold
             mb-8
             bg-gradient-to-r
@@ -151,7 +151,7 @@ const paginatedTrends =
 
         {/* Search + Sort */}
 
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
           <input
             type="text"
@@ -264,11 +264,10 @@ const paginatedTrends =
                     cursor-pointer
                   "
                 >
-                  <div className="flex justify-between items-start">
-
+                  <div className="flex flex-col sm:flex-row justify-between gap-4">
                     <div>
 
-                      <h2 className="text-2xl font-bold">
+                      <h2 className="text-xl sm:text-2xl font-bold">
                         {trend.title}
                       </h2>
 
@@ -294,7 +293,7 @@ const paginatedTrends =
 
                   </div>
 
-                  <div className="flex gap-3 mt-5">
+                  <div className="flex flex-wrap gap-3 mt-5">
 
                     <span
                       className="
@@ -326,7 +325,7 @@ const paginatedTrends =
 
         </div>
 
-        <div className="flex justify-center items-center gap-4 mt-10">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-10">
 
   <button
     disabled={currentPage === 1}

@@ -40,9 +40,6 @@ export default function LoginPage() {
   },
 });
 
-console.log("OTP DATA:", data);
-console.log("OTP ERROR:", error);
-
 if (error) {
   throw error;
 }

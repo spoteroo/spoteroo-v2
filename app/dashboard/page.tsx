@@ -16,6 +16,7 @@ import SearchBar from "./components/SearchBar";
 import CategoryFilter from "./components/CategoryFilter";
 import Pagination from "./components/Pagination";
 import TrendTable from "./components/TrendTable";
+import { toast } from "sonner";
 
 type Trend = {
   id: number;
@@ -227,7 +228,6 @@ const [topCategory, setTopCategory] =
   .eq("email", user.email)
   .eq("usage_date", today);
 
-  console.log("Today's Usage Rows:", usageRows);
 
       if (usageRows) {
         const totalUsage = usageRows.reduce(
@@ -235,14 +235,13 @@ const [topCategory, setTopCategory] =
   0
 );
 
-console.log("Today's Total Usage:", totalUsage);
 
 setAiUsageToday(totalUsage);
       }
     }
 
     loadDashboard();
-  }, [router]);
+  }, [router, supabase]);
 
     if (checkingAuth) {
     return (
@@ -287,23 +286,23 @@ setAiUsageToday(totalUsage);
     trendsList.length > 0 ? trendsList[0] : null;
 
   return (
-    <main className="min-h-screen bg-black text-white p-10">
+    <main className="min-h-screen bg-black text-white px-4 py-8 sm:px-6 lg:px-10">
       <div className="max-w-7xl mx-auto">
 
         <DashboardHeader
   onDiscover={async () => {
-    await fetch("/api/discover-trends", {
-      method: "POST",
-    });
+  await fetch("/api/discover-trends", {
+    method: "POST",
+  });
 
-    window.location.reload();
-  }}
+  router.refresh();
+}}
   onNewsletter={async () => {
     await fetch("/api/send-newsletter", {
       method: "POST",
     });
 
-    alert("Newsletter Sent");
+    toast.success("Newsletter sent successfully!");
   }}
 />
         {usage && (
@@ -345,8 +344,7 @@ setAiUsageToday(totalUsage);
           conversionRate={conversionRate}
         />
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-10">
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
           <RevenueChart
             data={revenueChartData}
           />
@@ -357,7 +355,7 @@ setAiUsageToday(totalUsage);
 
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
 
   <AIUsageCard
     aiUsageToday={aiUsageToday}
@@ -369,7 +367,7 @@ setAiUsageToday(totalUsage);
 
 </div>
 
-<div className="grid md:grid-cols-3 gap-6 mb-10">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
   <div className="glass p-6 rounded-2xl">
     <h3 className="text-slate-400">

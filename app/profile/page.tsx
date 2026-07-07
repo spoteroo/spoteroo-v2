@@ -11,7 +11,7 @@ export default function ProfilePage() {
   
   const [email, setEmail] = useState("");
 
-  const [plan, setPlan] = useState("free");
+  const [plan, setPlan] = useState("pro");
 
   const [favorites, setFavorites] = useState(0);
 
@@ -115,14 +115,14 @@ export default function ProfilePage() {
   }, [loadProfile]);
 
   return (
-    <main className="min-h-screen text-white p-10">
+    <main className="min-h-screen text-white px-4 py-8 sm:px-6 lg:px-10">
       <div className="max-w-3xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-10">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-10">
           My Profile
         </h1>
 
-        <div className="glass p-8 rounded-2xl">
+        <div className="glass rounded-2xl p-6 sm:p-8">
 
           {/* Email */}
 
@@ -131,7 +131,7 @@ export default function ProfilePage() {
               Email
             </p>
 
-            <p className="text-xl mt-2">
+            <p className="text-lg sm:text-xl mt-2 break-words">
               {email}
             </p>
           </div>
@@ -143,9 +143,25 @@ export default function ProfilePage() {
               Current Plan
             </p>
 
-            <p className="text-xl capitalize font-semibold">
-              {plan}
-            </p>
+            <span
+  className={`
+    inline-block
+    mt-2
+    rounded-full
+    px-4
+    py-2
+    text-sm
+    font-semibold
+
+    ${
+      plan === "pro"
+        ? "bg-green-500/20 text-green-400 border border-green-500/30"
+        : "bg-slate-700 text-slate-300 border border-slate-600"
+    }
+  `}
+>
+  {plan.toUpperCase()}
+</span>
           </div>
 
           {/* Subscription Status */}
@@ -186,14 +202,14 @@ export default function ProfilePage() {
               AI Usage
             </h2>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
               <div className="glass p-5 rounded-xl">
                 <p className="text-slate-400">
                   AI Usage Today
                 </p>
 
-                <p className="text-3xl font-bold mt-2">
+                <p className="text-2xl sm:text-3xl font-bold mt-2 break-words">
                   {usageToday}
                 </p>
               </div>
@@ -203,7 +219,7 @@ export default function ProfilePage() {
                   Startup Ideas Remaining
                 </p>
 
-                <p className="text-3xl font-bold mt-2">
+                <p className="text-2xl sm:text-3xl font-bold mt-2 break-words">
                   {plan === "pro"
                     ? "Unlimited"
                     : startupIdeasRemaining}
@@ -215,7 +231,7 @@ export default function ProfilePage() {
                   Premium Reports Remaining
                 </p>
 
-                <p className="text-3xl font-bold mt-2">
+                <p className="text-2xl sm:text-3xl font-bold mt-2 break-words">
                   {plan === "pro"
                     ? "Unlimited"
                     : premiumReportsRemaining}
@@ -227,7 +243,7 @@ export default function ProfilePage() {
                   Subscription Expires
                 </p>
 
-                <p className="text-xl mt-2">
+                <p className="text-lg sm:text-xl mt-2 break-words">
                   {plan === "pro"
                     ? subscriptionExpiry
                     : "Free Plan"}
@@ -240,7 +256,7 @@ export default function ProfilePage() {
 
           {/* Upgrade Button */}
 
-          <div className="mt-10 flex gap-4 justify-center">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
 
             {plan !== "pro" ? (
               <button
@@ -248,12 +264,15 @@ export default function ProfilePage() {
                   window.location.href = "/pricing";
                 }}
                 className="
-                  bg-blue-600
-                  hover:bg-blue-700
-                  px-8
-                  py-4
-                  rounded-xl
-                "
+  w-full
+  sm:w-auto
+  bg-blue-600
+  hover:bg-blue-700
+  px-8
+  py-4
+  rounded-xl
+  transition
+"
               >
                 Upgrade to Pro
               </button>
@@ -297,12 +316,15 @@ export default function ProfilePage() {
     }
   }}
   className="
-    bg-slate-700
-    hover:bg-slate-600
-    px-8
-    py-4
-    rounded-xl
-  "
+  w-full
+  sm:w-auto
+  bg-slate-700
+  hover:bg-slate-600
+  px-8
+  py-4
+  rounded-xl
+  transition
+"
 >
   Manage Subscription
 </button>
