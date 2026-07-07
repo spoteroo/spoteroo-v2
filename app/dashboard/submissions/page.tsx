@@ -1,7 +1,9 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import SubmissionsClient from "./SubmissionsClient";
 
 export default async function SubmissionsPage() {
+  const supabase = createClient();
+
   const { data: submissions, error } = await supabase
     .from("trend_submissions")
     .select("*")

@@ -1,13 +1,13 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { revalidatePath } from "next/cache";
 
 export async function approveSubmission(id: string) {
   console.log("APPROVE ID:", id);
 
   const { data: submission, error: fetchError } =
-    await supabase
+    await supabaseAdmin
       .from("trend_submissions")
       .select("*")
       .eq("id", id)
@@ -21,14 +21,14 @@ export async function approveSubmission(id: string) {
     throw new Error("Submission not found");
   }
 
-  const { data: existingTrend } = await supabase
+  const { data: existingTrend } = await supabaseAdmin
     .from("trends")
     .select("id")
     .eq("title", submission.title)
     .maybeSingle();
 
   if (existingTrend) {
-    await supabase
+    await supabaseAdmin
       .from("trend_submissions")
       .update({
         status: "rejected",
@@ -40,7 +40,7 @@ export async function approveSubmission(id: string) {
     return;
   }
 
-  const { error: insertError } = await supabase
+  const { error: insertError } = await supabaseAdmin
     .from("trends")
     .insert({
       title: submission.title,
@@ -54,7 +54,7 @@ export async function approveSubmission(id: string) {
     throw new Error(insertError.message);
   }
 
-  const { error: approveError } = await supabase
+  const { error: approveError } = await supabaseAdmin
     .from("trend_submissions")
     .update({
       status: "approved",
@@ -79,7 +79,7 @@ export async function rejectSubmission(
 
   console.log("REJECT ID:", id);
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("trend_submissions")
     .update({
       status: "rejected",

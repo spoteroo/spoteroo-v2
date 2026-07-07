@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { supabase } from "../lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
+  const supabase = await createClient();
+  
   const { data: trends } = await supabase
     .from("trends")
     .select("*")
@@ -123,7 +125,7 @@ const categoryCount = new Set(
               {subscriberCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
-              Categories
+              Newsletter Subscribers
             </p>
           </div>
 
@@ -132,7 +134,7 @@ const categoryCount = new Set(
               {favoriteCount ?? 0}
             </h3>
             <p className="text-slate-400 mt-2">
-              Monthly Readers
+              Favorites Saved
             </p>
           </div>
         </div>
@@ -238,6 +240,15 @@ const categoryCount = new Set(
           </div>
         </section>
 
+        <div className="mt-10 text-center mb-24">
+  <Link
+    href="/trends"
+    className="glass px-8 py-4 rounded-xl font-semibold"
+  >
+    View All Trends →
+  </Link>
+</div>
+
 
         {/* CTA */}
         {/* CUSTOMER TESTIMONIALS */}
@@ -250,38 +261,37 @@ const categoryCount = new Set(
   <div className="grid md:grid-cols-3 gap-6">
 
     <div className="glass p-8">
-      <p className="text-slate-300 italic">
-        "Spoteroo helped us discover our
-        next startup opportunity months
-        before competitors."
-      </p>
 
-      <p className="mt-6 font-bold">
-        — Spoteroo Beta User
-      </p>
+      <p className="text-slate-300 italic">
+  "Sample testimonial: Spoteroo helped us discover promising startup opportunities much earlier than we expected."
+</p>
+
+<p className="mt-6 font-bold">
+  — Sample Founder Feedback
+</p>
     </div>
 
     <div className="glass p-8">
       <p className="text-slate-300 italic">
-        "The AI startup ideas alone are
-        worth the subscription."
-      </p>
+  "Sample testimonial: The AI startup ideas gave us several interesting product directions."
+</p>
 
-      <p className="mt-6 font-bold">
-        — Early Founder
-      </p>
+<p className="mt-6 font-bold">
+  — Sample Startup Team
+</p>
+
+  
     </div>
 
     <div className="glass p-8">
       <p className="text-slate-300 italic">
-        "Every week we discover new
-        opportunities before everyone
-        else."
-      </p>
+  "Sample testimonial: Spoteroo makes it much easier to keep track of emerging markets."
+</p>
 
-      <p className="mt-6 font-bold">
-        — Product Builder
-      </p>
+<p className="mt-6 font-bold">
+  — Sample Investor
+</p>
+
     </div>
 
   </div>
@@ -292,7 +302,7 @@ const categoryCount = new Set(
 <section className="mb-24 text-center">
 
   <h2 className="text-4xl font-bold mb-10">
-    Trusted by Builders Worldwide
+   Built For
   </h2>
 
   <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
@@ -401,32 +411,52 @@ const categoryCount = new Set(
 
 </section>
         <section className="glass p-12 text-center">
-          <h2 className="text-5xl font-bold mb-6">
-            Ready to discover the next
-            billion-dollar opportunity?
-          </h2>
 
-          <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
-            Join Spoteroo and stay ahead of emerging
-            markets, startup opportunities, and future trends.
-          </p>
+  <h2>
+    Ready to discover the next
+    billion-dollar opportunity?
+  </h2>
 
-          <Link
-            href="/trends"
-            className="
-              inline-block
-              bg-blue-600
-              px-8 py-4
-              rounded-xl
-              font-semibold
-              hover:bg-blue-500
-              transition
-              shadow-[0_0_25px_rgba(59,130,246,0.4)]
-            "
-          >
-            Start Exploring →
-          </Link>
-        </section>
+  <p>
+    Join Spoteroo and stay ahead of emerging
+    markets, startup opportunities, and future trends.
+  </p>
+
+  <div className="flex justify-center gap-4 flex-wrap">
+
+    <Link
+      href="/trends"
+      className="
+        inline-block
+        bg-blue-600
+        px-8
+        py-4
+        rounded-xl
+        font-semibold
+        hover:bg-blue-500
+        transition
+        shadow-[0_0_25px_rgba(59,130,246,0.4)]
+      "
+    >
+      Start Exploring →
+    </Link>
+
+    <Link
+      href="/pricing"
+      className="
+        glass
+        px-8
+        py-4
+        rounded-xl
+        font-semibold
+      "
+    >
+      View Pricing
+    </Link>
+
+  </div>
+
+</section>
 
       </section>
     </main>

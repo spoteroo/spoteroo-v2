@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "../../lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 
 type Trend = {
@@ -21,6 +21,7 @@ type Trend = {
    const ITEMS_PER_PAGE = 10;
 
 export default function TrendsPage() {
+  const supabase = createClient();
 
   const [trends, setTrends] =
     useState<Trend[]>([]);

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 export default function NewsletterPage() {
+  const supabase = createClient();
+  
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 

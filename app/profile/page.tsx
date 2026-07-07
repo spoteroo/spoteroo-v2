@@ -3,10 +3,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "../../lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
+  const supabase = createClient();
+  
   const [email, setEmail] = useState("");
 
   const [plan, setPlan] = useState("free");

@@ -45,6 +45,26 @@ export async function downgradeUser(email: string) {
     .eq("email", email);
 }
 
+export const PLAN_LIMITS = {
+  free: {
+    startupIdeas: 5,
+    premiumReports: 2,
+    aiRequests: 20,
+  },
+
+  pro: {
+    startupIdeas: 30,
+    premiumReports: 20,
+    aiRequests: 100,
+  },
+
+  enterprise: {
+    startupIdeas: -1, // unlimited
+    premiumReports: -1,
+    aiRequests: -1,
+  },
+};
+
 export async function canUseFeature(
   email: string,
   feature: string,

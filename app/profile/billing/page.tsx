@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PLAN_LIMITS } from "@/lib/subscription";
 
 export default async function BillingPage() {
   
@@ -21,6 +22,39 @@ if (user) {
   profile = data;
 }
 
+const { data: usage } = await supabase
+  .from("ai_usage")
+  .select("*")
+  .eq("email", user?.email ?? "");
+
+  const startupIdeasUsed =
+  usage?.find((u) => u.feature === "startup_ideas")?.count ?? 0;
+
+const premiumReportsUsed =
+  usage?.find((u) => u.feature === "premium_reports")?.count ?? 0;
+
+const aiRequestsUsed =
+  usage?.find((u) => u.feature === "ai_requests")?.count ?? 0;
+
+  const limits =
+  PLAN_LIMITS[
+    (profile?.plan?.toLowerCase() as keyof typeof PLAN_LIMITS) || "free"
+  ];
+
+const renewalDate = profile?.subscription_expires_at
+  ? new Date(profile.subscription_expires_at)
+  : null;
+
+const daysRemaining = renewalDate
+  ? Math.max(
+      0,
+      Math.ceil(
+        (renewalDate.getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24)
+      )
+    )
+  : null;
+
 return (
 <main className="min-h-screen bg-black text-white px-6 py-10">
       <div className="mx-auto max-w-6xl space-y-8">
@@ -39,7 +73,13 @@ return (
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Subscription</h2>
 
-              <span className="rounded-full bg-emerald-500/20 px-4 py-1 text-sm font-semibold text-emerald-400">
+              <span
+  className={`rounded-full px-4 py-1 text-sm font-semibold ${
+    profile?.subscription_status === "active"
+      ? "bg-emerald-500/20 text-emerald-400"
+      : "bg-red-500/20 text-red-400"
+  }`}
+>
                 {profile?.subscription_status?.toUpperCase() ?? "FREE"}
               </span>
             </div>
@@ -55,7 +95,9 @@ return (
               <div>
                 <p className="text-sm text-slate-400">Renewal Date</p>
                 <p className="text-xl font-semibold mt-1">
-  Renewal date unavailable
+  {renewalDate
+    ? renewalDate.toLocaleDateString()
+    : "Renewal date unavailable"}
 </p>
               </div>
 
@@ -64,7 +106,9 @@ return (
                   Days Remaining
                 </p>
                <p className="text-4xl font-bold text-cyan-400 mt-2">
-  —
+  {daysRemaining !== null
+    ? `${daysRemaining} Days`
+    : "—"}
 </p>
               </div>
 
@@ -101,22 +145,21 @@ return (
 
             <div className="mt-8 space-y-8">
               <UsageBar
-                title="Startup Ideas"
-                used={18}
-                total={30}
-              />
+  title="Startup Ideas"
+  used={startupIdeasUsed}
+  total={limits.startupIdeas}
+/>
 
               <UsageBar
-                title="Premium Reports"
-                used={9}
-                total={20}
-              />
-
+  title="Premium Reports"
+  used={premiumReportsUsed}
+  total={limits.premiumReports}
+/>
               <UsageBar
-                title="AI Requests"
-                used={72}
-                total={100}
-              />
+  title="AI Requests"
+  used={aiRequestsUsed}
+  total={limits.aiRequests}
+/>
             </div>
           </div>
         </div>
@@ -136,6 +179,92 @@ return (
             <Feature text="Priority AI Processing" />
           </div>
         </div>
+
+        {/* Billing History */}
+
+<div className="glass rounded-3xl p-8 mt-8">
+  <div className="flex items-center justify-between">
+    <div>
+      <h2 className="text-2xl font-bold">
+        Billing History
+      </h2>
+
+      <p className="mt-2 text-slate-400">
+        Recent invoices and payments.
+      </p>
+    </div>
+  </div>
+
+  <div className="mt-8 overflow-x-auto">
+    <table className="w-full">
+      <thead>
+        <tr className="border-b border-slate-800 text-left text-slate-400">
+          <th className="pb-4">Invoice</th>
+          <th className="pb-4">Date</th>
+          <th className="pb-4">Amount</th>
+          <th className="pb-4">Status</th>
+          <th className="pb-4 text-right">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr className="border-b border-slate-900">
+          <td className="py-5 font-medium">INV-1001</td>
+          <td>July 5, 2026</td>
+          <td>$49.00</td>
+
+          <td>
+            <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm text-emerald-400">
+              Paid
+            </span>
+          </td>
+
+          <td className="text-right">
+            <button className="rounded-xl border border-slate-700 px-4 py-2 text-sm hover:border-cyan-400">
+              Download
+            </button>
+          </td>
+        </tr>
+
+        <tr className="border-b border-slate-900">
+          <td className="py-5 font-medium">INV-1000</td>
+          <td>June 5, 2026</td>
+          <td>$49.00</td>
+
+          <td>
+            <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm text-emerald-400">
+              Paid
+            </span>
+          </td>
+
+          <td className="text-right">
+            <button className="rounded-xl border border-slate-700 px-4 py-2 text-sm hover:border-cyan-400">
+              Download
+            </button>
+          </td>
+        </tr>
+
+        <tr>
+          <td className="py-5 font-medium">INV-999</td>
+          <td>May 5, 2026</td>
+          <td>$49.00</td>
+
+          <td>
+            <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm text-emerald-400">
+              Paid
+            </span>
+          </td>
+
+          <td className="text-right">
+            <button className="rounded-xl border border-slate-700 px-4 py-2 text-sm hover:border-cyan-400">
+              Download
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
       </div>
     </main>
   );
@@ -150,14 +279,18 @@ function UsageBar({
   used: number;
   total: number;
 }) {
-  const percent = (used / total) * 100;
+ const unlimited = total === -1;
+
+const percent = unlimited
+  ? 100
+  : Math.min((used / total) * 100, 100);
 
   return (
     <div>
       <div className="mb-2 flex justify-between text-sm">
         <span>{title}</span>
         <span className="text-slate-400">
-          {used}/{total}
+          {unlimited ? "Unlimited" : `${used}/${total}`}
         </span>
       </div>
 
