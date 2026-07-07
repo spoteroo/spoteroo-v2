@@ -99,7 +99,7 @@ export async function incrementUsage(
     .toISOString()
     .split("T")[0];
 
-  const { data } = await supabase
+  const { data, error: fetchError } = await supabase
     .from("ai_usage")
     .select("*")
     .eq("email", email)
@@ -107,21 +107,40 @@ export async function incrementUsage(
     .eq("usage_date", today)
     .maybeSingle();
 
+  if (fetchError) {
+    console.error("AI Usage Fetch Error:", fetchError);
+    return;
+  }
+
   if (!data) {
-    await supabase.from("ai_usage").insert({
-      email,
-      feature,
-      usage_date: today,
-      count: 1,
-    });
+    const { error: insertError } = await supabase
+      .from("ai_usage")
+      .insert({
+        email,
+        feature,
+        usage_date: today,
+        count: 1,
+      });
+
+    if (insertError) {
+      console.error("AI Usage Insert Error:", insertError);
+    } else {
+      console.log("AI Usage Inserted Successfully");
+    }
 
     return;
   }
 
-  await supabase
+  const { error: updateError } = await supabase
     .from("ai_usage")
     .update({
       count: data.count + 1,
     })
     .eq("id", data.id);
+
+  if (updateError) {
+    console.error("AI Usage Update Error:", updateError);
+  } else {
+    console.log("AI Usage Updated Successfully");
+  }
 }

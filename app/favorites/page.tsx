@@ -1,9 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "../../lib/supabase";
-
+import { createClient } from "@/lib/supabase/server";
+import RemoveFavoriteButton from "@/app/components/RemoveFavoriteButton";
 
 type Trend = {
   id: number;
@@ -13,226 +10,185 @@ type Trend = {
   score: number;
 };
 
-type FavoriteTrend = {
-  id: number;
-  trend_id: number;
-  user_email: string;
-  created_at: string;
-  trends: Trend | null;
-};
+export default async function FavoritesPage() {
+  const supabase = await createClient();
 
-export default function FavoritesPage() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const [loading, setLoading] =
-  useState(true);
+  console.log("SERVER USER:", user);
 
-  const [favorites, setFavorites] = useState<
-    FavoriteTrend[]
-  >([]);
+if (!user?.email) {
+    return (
+      <main className="min-h-screen flex items-center justify-center text-white">
+        Please login first.
+      </main>
+    );
+  }
 
-  useEffect(() => {
-    async function loadFavorites() {
-  setLoading(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const { data: favoriteRows, error } = await supabase
+    .from("favorites")
+    .select("*")
+    .eq("user_email", user.email)
+    .order("created_at", { ascending: false });
 
-     if (!user?.email) {
-  setLoading(false);
-  return;
-}
+    console.log("SERVER FAVORITES:", favoriteRows);
+console.log("SERVER ERROR:", error);
 
-      const { data, error } = await supabase
-        .from("favorites")
-        .select(`
-          *,
-          trends (*)
-        `)
-        .eq("user_email", user.email);
+  if (error) {
+    console.error(error);
 
-      if (error) {
-        console.error(
-          "Failed to load favorites:",
-          error
-        );
-        return;
-      }
+    return (
+      <main className="min-h-screen flex items-center justify-center text-red-400">
+        Failed to load favorites.
+      </main>
+    );
+  }
 
-      setFavorites(
-        (data as FavoriteTrend[]) || []
-      );
-
-      setLoading(false);
-    }
-
-    loadFavorites();
-  }, []);
-
-  if (loading) {
-  return (
-    <main className="min-h-screen flex items-center justify-center text-white">
-      Loading Favorites...
-    </main>
+  const trendIds = (favoriteRows ?? []).map(
+    (f) => f.trend_id
   );
-}
 
-  return (
-    <main className="min-h-screen text-white p-10">
-      <div className="max-w-5xl mx-auto">
+  const { data: trends } =
+    trendIds.length > 0
+      ? await supabase
+          .from("trends")
+          .select("*")
+          .in("id", trendIds)
+      : { data: [] };
 
-        <Link
-  href="/trends"
-  className="
-    text-blue-400
-    hover:text-blue-300
-    mb-6
-    inline-block
-  "
->
-  ← Back to Trends
-</Link>
+  const favorites =
+    (favoriteRows ?? [])
+      .map((favorite) => ({
+        ...favorite,
+        trend: trends?.find(
+          (t) => t.id === favorite.trend_id
+        ),
+      }))
+      .filter((f) => f.trend);
 
-        <div className="mb-10">
-          <h1
-            className="
-              text-6xl
-              font-bold
-              bg-gradient-to-r
-              from-white
-              to-yellow-400
-              bg-clip-text
-              text-transparent
-            "
-          >
-            Favorites
-          </h1>
+          return (
+  <main className="min-h-screen text-white p-10">
+    <div className="max-w-5xl mx-auto">
+
+      <Link
+        href="/trends"
+        className="text-blue-400 hover:text-blue-300 mb-6 inline-block"
+      >
+        ← Back to Trends
+      </Link>
+
+      <div className="mb-10">
+
+        <h1
+          className="
+            text-6xl
+            font-bold
+            bg-gradient-to-r
+            from-white
+            to-yellow-400
+            bg-clip-text
+            text-transparent
+          "
+        >
+          Favorites
+        </h1>
+
+        <p className="text-slate-400 mt-2">
+          Your saved startup opportunities
+        </p>
+
+        <p className="text-slate-500 mt-1">
+          {favorites.length} saved trends
+        </p>
+
+      </div>
+
+      {favorites.length === 0 && (
+        <div className="glass p-8 text-center">
+
+          <h2 className="text-2xl font-bold">
+            No Favorites Yet
+          </h2>
 
           <p className="text-slate-400 mt-2">
-            Your saved startup opportunities
+            Save trends to see them here.
           </p>
 
-          <p className="text-slate-500 mt-1">
-            {favorites.length} saved trends
-          </p>
         </div>
+      )}
 
-        {favorites.length === 0 && (
-          <div className="glass p-8 text-center">
-            <h2 className="text-2xl font-bold">
-              No Favorites Yet
-            </h2>
+      <div className="space-y-5">
+          {favorites.map((favorite) => (
+  <Link
+    key={favorite.id}
+    href={`/trends/${favorite.trend.id}`}
+  >
+    <div
+      className="
+        glass
+        p-6
+        cursor-pointer
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border-yellow-500/30
+      "
+    >
+      <h2 className="text-2xl font-bold">
+        {favorite.trend.title}
+      </h2>
 
-            <p className="text-slate-400 mt-2">
-              Save trends to see them here.
-            </p>
-          </div>
-        )}
+      <p className="text-slate-400 mt-3">
+        {favorite.trend.description}
+      </p>
 
-        <div className="space-y-5">
-          {favorites.map((favorite) => {
-            if (!favorite.trends) return null;
+      <p className="text-xs text-slate-500 mt-2">
+        Saved on{" "}
+        {new Date(
+          favorite.created_at
+        ).toLocaleDateString()}
+      </p>
 
-            return (
-              <Link
-                key={favorite.id}
-                href={`/trends/${favorite.trends.id}`}
-              >
-                <div
-                  className="
-                    glass
-                    p-6
-                    cursor-pointer
-                    transition-all
-                    duration-300
-                    hover:-translate-y-1
-                    hover:border-yellow-500/30
-                  "
-                >
-                  <h2 className="text-2xl font-bold">
-                    {favorite.trends.title}
-                  </h2>
+      <div className="flex gap-3 mt-4 flex-wrap">
+        <span
+          className="
+            px-3
+            py-1
+            rounded-full
+            bg-blue-500/15
+            text-blue-300
+            border
+            border-blue-500/20
+            text-sm
+          "
+        >
+          {favorite.trend.category}
+        </span>
 
-                  <p className="text-slate-400 mt-3">
-                    {favorite.trends.description}
-                  </p>
-
-                  <p className="text-xs text-slate-500 mt-2">
-  Saved on{" "}
-  {new Date(
-    favorite.created_at
-  ).toLocaleDateString()}
-</p>
-
-                  <div className="flex gap-3 mt-4 flex-wrap">
-                    <span
-                      className="
-                        px-3 py-1
-                        rounded-full
-                        bg-blue-500/15
-                        text-blue-300
-                        border border-blue-500/20
-                        text-sm
-                      "
-                    >
-                      {favorite.trends.category}
-                    </span>
-
-                    <span
-                      className="
-                        px-3 py-1
-                        rounded-full
-                        bg-green-500/15
-                        text-green-300
-                        border border-green-500/20
-                        text-sm
-                      "
-                    >
-                      Score: {favorite.trends.score}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={async (e) => {
-                      e.preventDefault();
-
-                      const { error } =
-                        await supabase
-                          .from("favorites")
-                          .delete()
-                          .eq(
-                            "id",
-                            favorite.id
-                          );
-
-                      if (error) {
-                        alert(error.message);
-                        return;
-                      }
-
-                      setFavorites((prev) =>
-                        prev.filter(
-                          (f) =>
-                            f.id !== favorite.id
-                        )
-                      );
-                    }}
-                    className="
-                      mt-4
-                      bg-red-600
-                      px-4
-                      py-2
-                      rounded-xl
-                      shadow-[0_0_15px_rgba(239,68,68,0.35)]
-                    "
-                  >
-                    Remove Favorite
-                  </button>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <span
+          className="
+            px-3
+            py-1
+            rounded-full
+            bg-green-500/15
+            text-green-300
+            border
+            border-green-500/20
+            text-sm
+          "
+        >
+          Score: {favorite.trend.score}
+        </span>
       </div>
-    </main>
-  );
+
+      <RemoveFavoriteButton id={favorite.id} />
+    </div>
+  </Link>
+))}
+    </div>
+    </div>
+  </main>
+);
 }

@@ -46,13 +46,11 @@ export default function ProfilePage() {
 
     setEmail(user.email ?? "");
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select(
-        "plan, subscription_expires, subscription_status"
-      )
-      .eq("email", user.email)
-      .single();
+   const { data: profile } = await supabase
+  .from("profiles")
+  .select("plan, subscription_expires_at, subscription_status")
+  .eq("email", user.email)
+  .single();
 
     if (profile) {
       setPlan(profile.plan);
@@ -62,10 +60,10 @@ export default function ProfilePage() {
           "Inactive"
       );
 
-      if (profile.subscription_expires) {
+      if (profile.subscription_expires_at) {
         setSubscriptionExpiry(
           new Date(
-            profile.subscription_expires
+            profile.subscription_expires_at
           ).toLocaleDateString()
         );
       }

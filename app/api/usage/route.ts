@@ -10,7 +10,7 @@ export async function GET() {
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("plan, subscription_expires")
+      .select("plan, subscription_expires_at")
       .eq("email", email)
       .single();
 
@@ -62,7 +62,7 @@ export async function GET() {
           : Math.max(0, 2 - premiumReports),
 
       subscriptionExpiry:
-        profile.subscription_expires ?? "Free Plan",
+  profile.subscription_expires_at ?? "Free Plan",
     });
   } catch (error) {
     console.error(error);

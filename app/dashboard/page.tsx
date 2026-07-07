@@ -109,29 +109,21 @@ const [topCategory, setTopCategory] =
 
   useEffect(() => {
   async function loadDashboard() {
-    console.log("1. Dashboard started");
+
 
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    console.log("2. Current user:", user);
 
     if (!user) {
-      console.log("3. No user found");
       router.push("/login");
       return;
     }
 
-    console.log("4. User authenticated");
-
     setCheckingAuth(false);
 
-    console.log("5. Fetching /api/usage");
-
     const usageResponse = await fetch("/api/usage");
-
-    console.log("6. /api/usage status:", usageResponse.status);
 
       if (usageResponse.ok) {
         setUsage(await usageResponse.json());
@@ -223,50 +215,29 @@ const [topCategory, setTopCategory] =
 } catch (error) {
   console.error(error);
 }
-
-const analyticsResponse = await fetch(
-  "/api/dashboard/analytics"
-);
-if (analyticsResponse.ok) {
-  const analytics =
-    await analyticsResponse.json();
-
-  setSubscriberCount(
-    analytics.subscribers
-  );
-
-  setVotesCount(
-    analytics.votes
-  );
-
-  setTopCategory(
-    analytics.topCategories?.[0]?.[0] ??
-      "N/A"
-  );
-}
       
       const today =
         new Date()
           .toISOString()
           .split("T")[0];
 
-      const { data: usageRows } =
-        await supabase
-          .from("ai_usage")
-          .select("count")
-          .eq(
-            "usage_date",
-            today
-          );
+      const { data: usageRows } = await supabase
+  .from("ai_usage")
+  .select("count")
+  .eq("email", user.email)
+  .eq("usage_date", today);
+
+  console.log("Today's Usage Rows:", usageRows);
 
       if (usageRows) {
-        setAiUsageToday(
-          usageRows.reduce(
-            (sum, row) =>
-              sum + row.count,
-            0
-          )
-        );
+        const totalUsage = usageRows.reduce(
+  (sum, row) => sum + row.count,
+  0
+);
+
+console.log("Today's Total Usage:", totalUsage);
+
+setAiUsageToday(totalUsage);
       }
     }
 
