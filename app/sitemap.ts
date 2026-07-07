@@ -1,9 +1,16 @@
 import type { MetadataRoute } from "next";
+import { createClient } from "@/lib/supabase/server";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://spoteroo.com";
 
-  return [
+  const supabase = await createClient();
+
+  const { data: trends } = await supabase
+    .from("trends")
+    .select("id, created_at");
+
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -35,10 +42,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-  url: `${baseUrl}/submit-trend`,
-  lastModified: new Date(),
-  changeFrequency: "weekly",
-  priority: 0.8,
-},
-  ];
-}
+     
