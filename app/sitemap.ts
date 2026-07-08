@@ -42,4 +42,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-     
+      url: `${baseUrl}/submit-trend`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+  ];
+
+  const trendPages: MetadataRoute.Sitemap = (trends ?? []).map((trend) => ({
+    url: `${baseUrl}/trends/${trend.id}`,
+    lastModified: trend.created_at
+      ? new Date(trend.created_at)
+      : new Date(),
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...trendPages];
+}
