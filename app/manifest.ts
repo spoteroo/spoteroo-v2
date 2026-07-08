@@ -10,6 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
+    display_override: ["window-controls-overlay", "standalone"],
 
     background_color: "#000000",
     theme_color: "#000000",
@@ -24,6 +25,9 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
 
     lang: "en",
+    dir: "ltr",
+
+    id: "/",
 
     icons: [
       {

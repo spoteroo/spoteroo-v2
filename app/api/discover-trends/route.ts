@@ -128,23 +128,49 @@ Example:
       }
 
       const { error } =
-        await supabaseAdmin
-          .from("trends")
-          .insert({
-            title: trend.title,
-            description:
-              trend.description,
-            category: trend.category,
-            score: trend.score,
-            reason: trend.reason,
-            startup_idea:
-              trend.startup_idea,
-            market_analysis:
-              trend.market_analysis,
-            competitors:
-              trend.competitors,
-            risks: trend.risks,
-          });
+  await supabaseAdmin
+    .from("trends")
+    .insert({
+      title: trend.title,
+      description: trend.description,
+      category: trend.category,
+      score: trend.score,
+      reason: trend.reason,
+      startup_idea: trend.startup_idea,
+      market_analysis: trend.market_analysis,
+      competitors: trend.competitors,
+      risks: trend.risks,
+
+      opportunity_score:
+        trend.opportunity_score,
+
+      momentum:
+        trend.momentum,
+
+      investment_rating:
+        trend.investment_rating,
+
+      competition_level:
+        trend.competition_level,
+
+      market_size:
+        trend.market_size,
+
+      forecast_30d:
+        trend.forecast_30d,
+
+      forecast_90d:
+        trend.forecast_90d,
+
+      forecast_1y:
+        trend.forecast_1y,
+
+      success_probability:
+        trend.success_probability,
+
+      unicorn_potential:
+        trend.unicorn_potential,
+    });
 
       if (!error) {
         inserted++;

@@ -8,15 +8,30 @@ import {
   incrementUsage,
 } from "@/lib/subscription";
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export async function POST(req: Request) {
   try {
     const { email } = await requireUser();
 
-    const {
-      id,
-      title,
-      description,
-    } = await req.json();
+    const body = await req.json();
+
+    const id = body.id;
+    const title = body.title?.trim();
+    const description = body.description?.trim();
+
+    if (!id || !title || !description) {
+      return NextResponse.json(
+        {
+          error: "Missing required fields.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const allowed = await canUseFeature(
       email,
@@ -47,14 +62,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     const response = await openai.responses.create({
       model: "gpt-4.1-mini",
-      input: `
-Trend: ${title}
+      temperature: 0.7,
+      max_output_tokens: 1200,
+      input: [
+        {
+          role: "system",
+          content:
+            "You are an expert startup analyst. Always follow the requested output format exactly.",
+        },
+        {
+          role: "user",
+          content: `
+Trend:
+${title}
 
 Description:
 ${description}
@@ -73,6 +95,8 @@ COMPETITORS:
 RISKS:
 (main risks)
 `,
+        },
+      ],
     });
 
     const output = response.output_text ?? "";
@@ -132,7 +156,6 @@ RISKS:
       competitors,
       risks,
     });
-
   } catch (error) {
     console.error(error);
 

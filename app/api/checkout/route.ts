@@ -16,10 +16,17 @@ export async function POST(request: Request) {
     const email = body.email;
 
     //-------------------------------------------------------
+    // Normalize Email
+    //-------------------------------------------------------
+
+    const normalizedEmail =
+      email?.trim().toLowerCase();
+
+    //-------------------------------------------------------
     // Validation
     //-------------------------------------------------------
 
-    if (!email) {
+    if (!normalizedEmail) {
       return NextResponse.json(
         {
           error: "Email is required.",
@@ -65,13 +72,6 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("========== CHECKOUT ==========");
-    console.log({
-      email,
-      plan,
-      productId,
-    });
-
     //-------------------------------------------------------
     // Create Checkout Session
     //-------------------------------------------------------
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
           },
         ],
         customer: {
-          email,
+          email: normalizedEmail,
         },
         return_url:
           process.env.DODO_PAYMENTS_RETURN_URL,
@@ -97,15 +97,12 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Checkout Created");
-
     return NextResponse.json({
       success: true,
       checkout_url: session.checkout_url,
     });
   } catch (error) {
-    console.error("Checkout Error");
-    console.error(error);
+    console.error("Checkout Error:", error);
 
     const message =
       error instanceof Error

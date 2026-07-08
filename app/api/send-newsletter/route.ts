@@ -16,10 +16,25 @@ const resend = new Resend(
   process.env.RESEND_API_KEY!
 );
 
-export async function POST() {
-  console.log("SEND NEWSLETTER API HIT");
+export async function POST(request: Request) {
+ console.info("Newsletter job started");
 
   try {
+    const authHeader = request.headers.get("authorization");
+
+if (
+  authHeader !==
+  `Bearer ${process.env.CRON_SECRET}`
+) {
+  return NextResponse.json(
+    {
+      error: "Unauthorized",
+    },
+    {
+      status: 401,
+    }
+  );
+}
     const {
       data: subscribers,
       error: subscribersError,
