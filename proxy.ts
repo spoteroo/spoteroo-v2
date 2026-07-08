@@ -1,7 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+export const runtime = "edge";
+
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip metadata routes
+  if (
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname === "/feed.xml" ||
+    pathname === "/llms.txt" ||
+    pathname === "/manifest.webmanifest"
+  ) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({
     request,
   });
@@ -32,7 +47,6 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refresh the session
   await supabase.auth.getUser();
 
   return response;
