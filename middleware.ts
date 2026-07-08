@@ -1,12 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-export const runtime = "edge";
-
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip metadata routes
   if (
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
