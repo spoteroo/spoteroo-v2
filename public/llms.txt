@@ -1,0 +1,27 @@
+# Spoteroo
+
+Spoteroo is an AI-powered opportunity intelligence platform helping founders, investors, and builders discover emerging startup opportunities before they become mainstream.
+
+Website:
+https://spoteroo.com
+
+Important Pages:
+https://spoteroo.com/trends
+https://spoteroo.com/pricing
+https://spoteroo.com/newsletter
+https://spoteroo.com/about
+
+Sitemap:
+https://spoteroo.com/sitemap.xml
+
+RSS Feed:
+https://spoteroo.com/feed.xml
+
+GitHub:
+https://github.com/spoteroo
+
+X:
+https://x.com/getspoteroo
+
+Product Hunt:
+https://www.producthunt.com/@spoteroo

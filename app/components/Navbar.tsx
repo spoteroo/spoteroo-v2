@@ -68,16 +68,16 @@ useEffect(() => {
   className="flex items-center gap-3"
 >
   <Image
-    src="/logo.svg"
-    alt="Spoteroo"
-    width={36}
-    height={36}
-    priority
-  />
+  src="/logo.svg"
+  alt="Spoteroo"
+  width={36}
+  height={36}
+  priority
+/>
 
-  <span className="text-2xl font-bold text-white transition hover:text-blue-400">
-    Spoteroo
-  </span>
+<span className="text-2xl font-bold text-white">
+  Spoteroo
+</span>
 </Link>
 
           {/* Desktop Navigation */}
