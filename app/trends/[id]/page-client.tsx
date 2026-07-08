@@ -15,6 +15,7 @@ type Trend = {
   description: string;
   category: string;
   score: number;
+  created_at: string;
 
   reason?: string;
 
@@ -84,6 +85,7 @@ export default function TrendDetailClient() {
   description,
   category,
   score,
+  created_at,
   reason,
   startup_idea,
   market_analysis,
@@ -366,8 +368,71 @@ doc.text(
   }
 
   return (
-    <main className="min-h-screen text-white px-4 py-8 sm:px-6 lg:px-10">
-      <div className="max-w-4xl mx-auto">
+  <main className="min-h-screen text-white px-4 py-8 sm:px-6 lg:px-10">
+
+   <script
+  type="application/ld+json"
+  suppressHydrationWarning
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: trend.title,
+      description: trend.description,
+      articleSection: trend.category,
+      datePublished: trend.created_at,
+      dateModified: trend.created_at,
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": `https://spoteroo.com/trends/${trend.id}`,
+      },
+      author: {
+        "@type": "Organization",
+        name: "Spoteroo",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Spoteroo",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://spoteroo.com/logo.svg",
+        },
+      },
+    }),
+  }}
+/>
+
+    <div className="max-w-4xl mx-auto">
+      <script
+  type="application/ld+json"
+  suppressHydrationWarning
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://spoteroo.com",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Trends",
+          item: "https://spoteroo.com/trends",
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: trend.title,
+          item: `https://spoteroo.com/trends/${trend.id}`,
+        },
+      ],
+    }),
+  }}
+/>
 
         <Link
           href="/trends"

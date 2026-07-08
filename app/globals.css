@@ -25,7 +25,7 @@ body {
 
   min-height: 100vh;
 
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 .glass {
@@ -67,4 +67,12 @@ body {
 
 .glass-input::placeholder {
   color: rgba(255,255,255,.45);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  box-sizing: border-box;
 }

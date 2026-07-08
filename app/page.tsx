@@ -89,6 +89,57 @@ const categoryCount = new Set(
 
   return (
     <main className="min-h-screen text-white">
+      <script
+  type="application/ld+json"
+  suppressHydrationWarning
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://spoteroo.com/#organization",
+          name: "Spoteroo",
+          url: "https://spoteroo.com",
+          logo: "https://spoteroo.com/logo.svg",
+          sameAs: [
+            "https://x.com/getspoteroo",
+            "https://github.com/spoteroo",
+            "https://www.producthunt.com/@spoteroo",
+          ],
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://spoteroo.com/#website",
+          url: "https://spoteroo.com",
+          name: "Spoteroo",
+          publisher: {
+            "@id": "https://spoteroo.com/#organization",
+          },
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://spoteroo.com/trends?search={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://spoteroo.com/#webpage",
+          url: "https://spoteroo.com",
+          name: "Spoteroo – Discover Emerging Startup Opportunities with AI",
+          isPartOf: {
+            "@id": "https://spoteroo.com/#website",
+          },
+          about: {
+            "@id": "https://spoteroo.com/#organization",
+          },
+          description:
+            "AI-powered opportunity intelligence platform helping founders, investors and builders discover emerging startup opportunities before they become mainstream.",
+        },
+      ],
+    }),
+  }}
+/>
       <section className="max-w-7xl mx-auto px-6 py-20">
 
         {/* Hero */}
