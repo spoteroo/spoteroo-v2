@@ -367,6 +367,49 @@ setAiUsageToday(totalUsage);
 
 </div>
 
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+
+  <div className="glass p-6 rounded-2xl">
+    <h3 className="text-slate-400">
+      Total Trends
+    </h3>
+
+    <p className="text-4xl font-bold mt-3">
+      {trendsList.length}
+    </p>
+  </div>
+
+  <div className="glass p-6 rounded-2xl">
+    <h3 className="text-slate-400">
+      Average Score
+    </h3>
+
+    <p className="text-4xl font-bold mt-3">
+      {trendsList.length
+        ? Math.round(
+            trendsList.reduce(
+              (sum, trend) => sum + trend.score,
+              0
+            ) / trendsList.length
+          )
+        : 0}
+    </p>
+  </div>
+
+  <div className="glass p-6 rounded-2xl">
+    <h3 className="text-slate-400">
+      Highest Score
+    </h3>
+
+    <p className="text-4xl font-bold mt-3 text-green-400">
+      {trendsList.length
+        ? trendsList[0].score
+        : 0}
+    </p>
+  </div>
+
+</div>
+
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
   <div className="glass p-6 rounded-2xl">
@@ -397,6 +440,62 @@ setAiUsageToday(totalUsage);
     <p className="text-2xl font-bold mt-3">
       {topCategory}
     </p>
+  </div>
+
+</div>
+
+<div className="glass rounded-2xl p-6 mb-10">
+
+  <div className="flex items-center justify-between mb-6">
+    <h2 className="text-2xl font-bold">
+      Recently Added Trends
+    </h2>
+
+    <Link
+      href="/trends"
+      className="text-blue-400 hover:text-blue-300"
+    >
+      View All →
+    </Link>
+  </div>
+
+  <div className="space-y-4">
+
+    {trendsList.slice(0, 5).map((trend) => (
+
+      <div
+        key={trend.id}
+        className="flex justify-between items-center border-b border-white/10 pb-4"
+      >
+
+        <div>
+
+          <h3 className="font-semibold">
+            {trend.title}
+          </h3>
+
+          <p className="text-slate-400 text-sm">
+            {trend.category}
+          </p>
+
+        </div>
+
+        <span
+          className="
+            px-3
+            py-1
+            rounded-full
+            bg-green-500/20
+            text-green-300
+          "
+        >
+          {trend.score}
+        </span>
+
+      </div>
+
+    ))}
+
   </div>
 
 </div>

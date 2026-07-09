@@ -360,12 +360,12 @@ doc.text(
     };
 
   if (!trend) {
-    return (
-      <main className="min-h-screen flex items-center justify-center text-white">
-        Loading...
-      </main>
-    );
-  }
+  return (
+    <main className="min-h-screen flex items-center justify-center">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+    </main>
+  );
+}
 
   return (
   <main className="min-h-screen text-white px-4 py-8 sm:px-6 lg:px-10">
@@ -395,7 +395,7 @@ doc.text(
         name: "Spoteroo",
         logo: {
           "@type": "ImageObject",
-          url: "https://spoteroo.com/logo.svg",
+          url: "https://spoteroo.com/SPOTEROO%20NEW%20LOGO1.png",
         },
       },
     }),
@@ -443,63 +443,173 @@ doc.text(
 
         <div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
-            {trend.title}
-          </h1>
+  <h1
+    className="
+      text-4xl
+      sm:text-5xl
+      lg:text-6xl
+      font-extrabold
+      leading-tight
+      bg-gradient-to-r
+      from-white
+      via-blue-300
+      to-cyan-400
+      bg-clip-text
+      text-transparent
+    "
+  >
+    {trend.title}
+  </h1>
 
+  <div className="mt-6 flex flex-wrap items-center gap-4">
+
+    <div
+      className="
+        flex
+        h-16
+        w-16
+        items-center
+        justify-center
+        rounded-full
+        bg-green-500/15
+        border
+        border-green-500/20
+        text-green-300
+        text-xl
+        font-bold
+      "
+    >
+      {trend.score}
+    </div>
+
+    <span
+      className="
+        rounded-full
+        border
+        border-blue-500/20
+        bg-blue-500/15
+        px-4
+        py-2
+        text-blue-300
+        font-medium
+      "
+    >
+      {trend.category}
+    </span>
+
+  </div>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8 mb-10">
+
+    <div
+      className="
+        glass
+        rounded-2xl
+        p-5
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border
+        hover:border-blue-500/40
+      "
+    >
+      <p className="text-slate-400 text-sm">
+        Opportunity Score
+      </p>
+
+      <h2 className="text-3xl font-bold text-green-400">
+        {trend.opportunity_score ?? "-"}
+      </h2>
+    </div>
+
+    <div
+      className="
+        glass
+        rounded-2xl
+        p-5
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border
+        hover:border-blue-500/40
+      "
+    >
+      <p className="text-slate-400 text-sm">
+        Momentum
+      </p>
+
+      <h2 className="text-2xl font-bold text-blue-400">
+        {trend.momentum ?? "-"}
+      </h2>
+    </div>
+
+    <div
+      className="
+        glass
+        rounded-2xl
+        p-5
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border
+        hover:border-blue-500/40
+      "
+    >
+      <p className="text-slate-400 text-sm">
+        Investment Rating
+      </p>
+
+      <h2 className="text-2xl font-bold text-yellow-400">
+        {trend.investment_rating ?? "-"}
+      </h2>
+    </div>
+
+    <div
+      className="
+        glass
+        rounded-2xl
+        p-5
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border
+        hover:border-blue-500/40
+      "
+    >
+      <p className="text-slate-400 text-sm">
+        Competition
+      </p>
+
+      <h2 className="text-2xl font-bold">
+        {trend.competition_level ?? "-"}
+      </h2>
+    </div>
+
+    <div
+      className="
+        glass
+        rounded-2xl
+        p-5
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border
+        hover:border-blue-500/40
+      "
+    >
+      <p className="text-slate-400 text-sm">
+        Market Size
+      </p>
+
+      <h2 className="text-2xl font-bold text-cyan-400">
+        {trend.market_size ?? "-"}
+      </h2>
+    </div>
+
+  </div>
+
+</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8 mb-10">
-
-                      <div className="glass p-5 rounded-2xl">
-            <p className="text-slate-400 text-sm">
-              Opportunity Score
-            </p>
-
-            <h2 className="text-3xl font-bold text-green-400">
-              {trend.opportunity_score ?? "-"}
-            </h2>
-          </div>
-
-          <div className="glass p-5 rounded-2xl">
-            <p className="text-slate-400 text-sm">
-              Momentum
-            </p>
-
-            <h2 className="text-2xl font-bold text-blue-400">
-              {trend.momentum ?? "-"}
-            </h2>
-          </div>
-
-          <div className="glass p-5 rounded-2xl">
-            <p className="text-slate-400 text-sm">
-              Investment Rating
-            </p>
-
-            <h2 className="text-2xl font-bold text-yellow-400">
-              {trend.investment_rating ?? "-"}
-            </h2>
-          </div>
-
-          <div className="glass p-5 rounded-2xl">
-            <p className="text-slate-400 text-sm">
-              Competition
-            </p>
-
-            <h2 className="text-2xl font-bold">
-              {trend.competition_level ?? "-"}
-            </h2>
-          </div>
-
-          <div className="glass p-5 rounded-2xl">
-            <p className="text-slate-400 text-sm">
-              Market Size
-            </p>
-
-            <h2 className="text-2xl font-bold text-cyan-400">
-              {trend.market_size ?? "-"}
-            </h2>
-          </div>
-
-          </div>
 
           <div className="glass rounded-3xl p-8 mb-10">
 
@@ -509,7 +619,7 @@ doc.text(
 
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
 
-              <div>
+              <div className="glass rounded-2xl p-5">
                 <p className="text-slate-400">
                   30 Days
                 </p>
@@ -519,7 +629,7 @@ doc.text(
                 </p>
               </div>
 
-              <div>
+              <div className="glass rounded-2xl p-5">
                 <p className="text-slate-400">
                   90 Days
                 </p>
@@ -529,7 +639,7 @@ doc.text(
                 </p>
               </div>
 
-              <div>
+              <div className="glass rounded-2xl p-5">
                 <p className="text-slate-400">
                   1 Year
                 </p>
@@ -539,7 +649,7 @@ doc.text(
                 </p>
               </div>
 
-              <div>
+              <div className="glass rounded-2xl p-5">
                 <p className="text-slate-400">
                   Success
                 </p>
@@ -549,7 +659,7 @@ doc.text(
                 </p>
               </div>
 
-              <div>
+              <div className="glass rounded-2xl p-5">
                 <p className="text-slate-400">
                   Unicorn Chance
                 </p>
@@ -679,15 +789,14 @@ toast.success("Trend saved!");
 
           </div>
 
-          <div className="mt-8 mb-6">
-
-            <span className="px-4 py-2 rounded-full bg-blue-500/20 border border-blue-500/20 text-blue-300">
-              {trend.category}
-            </span>
-
-          </div>
-
-          <div className="glass p-6 mb-6">
+          <div
+  className="
+    glass
+    rounded-3xl
+    p-8
+    mb-8
+  "
+>
 
             <h2 className="text-3xl font-bold mb-4">
               Description
@@ -701,7 +810,16 @@ toast.success("Trend saved!");
 
           {trend.reason && (
 
-            <div className="glass p-6 mb-6">
+            <div
+  className="
+    glass
+    rounded-3xl
+    p-8
+    mb-8
+    border
+    border-blue-500/20
+  "
+>
 
               <h2 className="text-3xl font-bold mb-4">
                 Why This Trend Matters
@@ -823,65 +941,59 @@ toast.success("Vote recorded!");
 
             {trend.startup_idea ? (
 
-              <div className="mt-6 space-y-8">
+  <div className="mt-6 space-y-8">
 
-              <div>
+    <div className="glass rounded-2xl p-6">
+      <h3 className="text-xl font-semibold mb-2">
+        Startup Idea
+      </h3>
 
-                <h3 className="text-xl font-semibold mb-2">
-                  Startup Idea
-                </h3>
+      <p className="text-slate-300 whitespace-pre-wrap leading-8">
+        {trend.startup_idea}
+      </p>
+    </div>
 
-                <p className="text-slate-300 whitespace-pre-wrap">
-                  {trend.startup_idea}
-                </p>
+    <div className="glass rounded-2xl p-6">
+      <h3 className="text-xl font-semibold mb-2">
+        Market Analysis
+      </h3>
 
-              </div>
+      <p className="text-slate-300 whitespace-pre-wrap leading-8">
+        {trend.market_analysis}
+      </p>
+    </div>
 
-              <div>
+    <div className="glass rounded-2xl p-6">
+      <h3 className="text-xl font-semibold mb-2">
+        Competitors
+      </h3>
 
-                <h3 className="text-xl font-semibold mb-2">
-                  Market Analysis
-                </h3>
+      <p className="text-slate-300 whitespace-pre-wrap leading-8">
+        {trend.competitors}
+      </p>
+    </div>
 
-                <p className="text-slate-300 whitespace-pre-wrap">
-                  {trend.market_analysis}
-                </p>
+    <div className="glass rounded-2xl p-6">
+      <h3 className="text-xl font-semibold mb-2">
+        Risks
+      </h3>
 
-              </div>
+      <p className="text-slate-300 whitespace-pre-wrap leading-8">
+        {trend.risks}
+      </p>
+    </div>
 
-              <div>
+  </div>
 
-                <h3 className="text-xl font-semibold mb-2">
-                  Competitors
-                </h3>
+) : (
 
-                <p className="text-slate-300 whitespace-pre-wrap">
-                  {trend.competitors}
-                </p>
+  <div className="glass rounded-2xl p-6 mt-6">
+    <p className="text-slate-500">
+      No startup idea generated yet.
+    </p>
+  </div>
 
-              </div>
-
-              <div>
-
-                <h3 className="text-xl font-semibold mb-2">
-                  Risks
-                </h3>
-
-                <p className="text-slate-300 whitespace-pre-wrap">
-                  {trend.risks}
-                </p>
-
-              </div>
-
-            </div>
-
-          ) : (
-
-            <p className="text-slate-500 mt-6">
-              No startup idea generated yet.
-            </p>
-
-          )}
+)}
 
           </div>
 
@@ -895,7 +1007,16 @@ toast.success("Vote recorded!");
 
               {trend.premium_report ? (
 
-                <div className="whitespace-pre-wrap leading-8 text-slate-300">
+                <div
+  className="
+    glass
+    rounded-2xl
+    p-6
+    whitespace-pre-wrap
+    leading-8
+    text-slate-300
+  "
+>
                   {trend.premium_report}
                 </div>
 

@@ -18,6 +18,11 @@ const navigation = [
 export default function Navbar() {
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+  href === "/"
+    ? pathname === "/"
+    : pathname.startsWith(href);
+
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
 
@@ -49,12 +54,14 @@ useEffect(() => {
         <div
   className="
     glass
+backdrop-blur-2xl
+bg-white/5
     flex
     items-center
     justify-between
     rounded-2xl
     px-6
-    py-4
+    py-5
     shadow-2xl
     border
     border-white/10
@@ -68,13 +75,13 @@ useEffect(() => {
   className="flex items-center gap-3"
 >
  <Image
-  src="/logo.svg"
+  src="/SPOTEROO NEW LOGO1.png"
   alt="Spoteroo"
-  width={160}
-  height={48}
+  width={220}
+  height={220}
   priority
-  className="h-10 w-auto"
- />
+  className="h-14 w-auto"
+/>
 </Link>
 
           {/* Desktop Navigation */}
@@ -89,19 +96,21 @@ useEffect(() => {
   relative
   font-medium
   transition-all
-  duration-200
+duration-300
+hover:scale-105
+hover:shadow-[0_0_30px_rgba(250,204,21,0.35)]
 
   ${
-    pathname === item.href
-      ? "text-blue-400"
-      : "text-gray-300 hover:text-white"
-  }
+  isActive(item.href)
+    ? "text-white font-semibold"
+    : "text-gray-300 hover:text-white"
+}
 `}
               >
                 <>
   <span>{item.name}</span>
 
-{pathname === item.href && (
+{isActive(item.href) && (
   <span
       className="
         absolute
@@ -153,11 +162,11 @@ useEffect(() => {
     flex-col
     justify-center
     gap-1.5
-    w-10
-    h-10
+    w-12
+h-12
     rounded-lg
     hover:bg-white/10
-    transition
+    transition-all duration-300
   "
   aria-label="Toggle Menu"
 >
@@ -195,6 +204,11 @@ useEffect(() => {
       lg:hidden
       mt-4
       glass
+      border
+border-white/10
+shadow-2xl
+backdrop-blur-2xl
+bg-white/5
       rounded-2xl
       overflow-hidden
       animate-in
@@ -217,8 +231,8 @@ useEffect(() => {
             transition
 
             ${
-              pathname === item.href
-                ? "bg-blue-500/20 text-blue-400"
+              isActive(item.href)
+  ? "text-white font-semibold"
                 : "text-gray-300 hover:bg-white/5 hover:text-white"
             }
           `}

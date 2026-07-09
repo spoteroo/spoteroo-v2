@@ -264,7 +264,7 @@ const paginatedTrends =
                     cursor-pointer
                   "
                 >
-                  <div className="flex flex-col sm:flex-row justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
 
                       <h2 className="text-xl sm:text-2xl font-bold">
@@ -277,36 +277,45 @@ const paginatedTrends =
 
                     </div>
 
-                    <span
-                      className="
-                        px-4
-                        py-2
-                        rounded-full
-                        bg-green-500/20
-                        text-green-300
-                        border
-                        border-green-500/20
-                      "
-                    >
-                      {trend.score}
-                    </span>
+                    <div
+  className="
+    flex
+    h-16
+    w-16
+    shrink-0
+    items-center
+    justify-center
+    rounded-full
+    bg-green-500/20
+    border
+    border-green-500/20
+    text-green-300
+    text-xl
+    font-bold
+    self-start
+    sm:self-center
+  "
+>
+  {trend.score}
+</div>
 
                   </div>
 
                   <div className="flex flex-wrap gap-3 mt-5">
 
                     <span
-                      className="
-                        px-3
-                        py-1
-                        rounded-full
-                        bg-blue-500/20
-                        text-blue-300
-                        border
-                        border-blue-500/20
-                        text-sm
-                      "
-                    >
+  className="
+    px-4
+    py-1.5
+    rounded-full
+    bg-blue-500/15
+    border
+    border-blue-500/30
+    text-blue-300
+    text-sm
+    font-medium
+  "
+>
                       {trend.category}
                     </span>
 

@@ -101,7 +101,7 @@ const categoryCount = new Set(
           "@id": "https://spoteroo.com/#organization",
           name: "Spoteroo",
           url: "https://spoteroo.com",
-          logo: "https://spoteroo.com/logo.svg",
+          logo: "https://spoteroo.com/SPOTEROO%20NEW%20LOGO1.png",
           sameAs: [
             "https://x.com/getspoteroo",
             "https://github.com/spoteroo",
@@ -144,35 +144,38 @@ const categoryCount = new Set(
 
         {/* Hero */}
         <div className="text-center mb-24">
-          <h1
-            className="
-              text-4xl
-lg:text-5xl
-sm:text-6xl
-lg:text-7xl
-xl:text-8xl
-              font-extrabold
-              bg-gradient-to-r
-              from-white
-              via-blue-300
-              to-cyan-400
-              bg-clip-text
-              text-transparent
-              mb-6
-            "
-          >
+         <h1
+  className="
+    text-5xl
+    sm:text-6xl
+    lg:text-7xl
+    xl:text-8xl
+    2xl:text-9xl
+    font-extrabold
+    tracking-tight
+    leading-tight
+    bg-gradient-to-r
+    from-white
+    via-blue-300
+    to-cyan-400
+    bg-clip-text
+    text-transparent
+    mb-8
+  "
+>
             Spot Tomorrow&apos;s
             <br />
             Opportunities Today
           </h1>
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm text-blue-300 mb-6">
+  🚀 AI-Powered Opportunity Intelligence
+</div>
 
-          <p className="text-lg
-sm:text-xl
-lg:text-2xl text-slate-300 mb-6">
+          <p className="text-xl sm:text-2xl lg:text-3xl font-medium text-slate-200 mb-6">
             Discover emerging startup trends before everyone else.
           </p>
 
-          <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+          <p className="mx-auto max-w-4xl text-lg sm:text-xl leading-8 text-slate-400">
             Spoteroo helps founders, investors, and builders discover
             high-potential trends, startup opportunities, and market shifts
             before they become mainstream.
@@ -182,14 +185,20 @@ lg:text-2xl text-slate-300 mb-6">
             <Link
               href="/trends"
               className="
-                bg-blue-600
-                px-8 py-4
-                rounded-xl
-                font-semibold
-                hover:bg-blue-500
-                transition
-                shadow-[0_0_25px_rgba(59,130,246,0.4)]
-              "
+  inline-flex
+  items-center
+  justify-center
+  rounded-xl
+  bg-blue-600
+  px-8
+  py-4
+  font-semibold
+  transition-all
+  duration-300
+  hover:scale-105
+  hover:bg-blue-500
+  hover:shadow-[0_0_35px_rgba(59,130,246,0.35)]
+"
             >
               Explore Trends
             </Link>
@@ -197,11 +206,20 @@ lg:text-2xl text-slate-300 mb-6">
             <Link
               href="/newsletter"
               className="
-                glass
-                px-8 py-4
-                rounded-xl
-                font-semibold
-              "
+  glass
+  inline-flex
+  items-center
+  justify-center
+  rounded-xl
+  px-8
+  py-4
+  font-semibold
+  transition-all
+  duration-300
+  hover:scale-105
+  hover:border-blue-500/40
+  hover:shadow-[0_0_25px_rgba(59,130,246,0.2)]
+"
             >
               Join Newsletter
             </Link>
@@ -312,21 +330,29 @@ lg:text-5xl font-bold mb-10">
                 href={`/trends/${trend.id}`}
               >
                 <div
-                  className="
-                    glass
-                    p-6
-                    cursor-pointer
-                    transition-all
-                    duration-300
-                    hover:-translate-y-1
-                  "
-                >
-                  <div className="flex
-flex-col
-sm:flex-row
-justify-between
-gap-4">
-                    <div>
+  className="
+    glass
+    p-6
+    cursor-pointer
+    transition-all
+    duration-300
+    hover:-translate-y-1
+    hover:border
+    hover:border-blue-500/40
+    hover:shadow-[0_0_35px_rgba(59,130,246,0.15)]
+  "
+>
+                  <div
+  className="
+    flex
+    flex-col
+    sm:flex-row
+    sm:items-center
+    justify-between
+    gap-4
+  "
+>
+                    <div className="flex-1">
                       <h3 className="text-lg
 sm:text-xl
 lg:text-2xl font-bold">
@@ -338,24 +364,49 @@ lg:text-2xl font-bold">
                       </p>
                     </div>
 
-                    <span
-                      className="
-                        px-4 py-2
-                        rounded-full
-                        bg-green-500/15
-                        text-green-300
-                        border border-green-500/20
-                      "
-                    >
-                      {trend.score}
-                    </span>
+                   <div
+  className="
+    flex
+    h-16
+    w-16
+    shrink-0
+    flex-col
+    items-center
+    justify-center
+    rounded-full
+    bg-green-500/15
+    border
+    border-green-500/20
+    self-start
+    sm:self-center
+  "
+>
+  <span className="text-xl font-bold text-green-300 leading-none">
+    {trend.score}
+  </span>
+
+  <span className="text-[10px] uppercase tracking-wider text-green-400 mt-1">
+    Score
+  </span>
+</div>
                   </div>
 
                   {trend.reason && (
-                    <p className="text-slate-500 mt-4 italic">
-                      {trend.reason}
-                    </p>
-                  )}
+  <div
+    className="
+      mt-4
+      rounded-xl
+      border
+      border-blue-500/20
+      bg-blue-500/5
+      p-4
+    "
+  >
+    <p className="text-slate-300 italic">
+      {trend.reason}
+    </p>
+  </div>
+)}
                 </div>
               </Link>
             ))}
@@ -372,12 +423,16 @@ items-center
 justify-center
 w-full
 sm:w-auto
-px-8
+px-10
 py-4
 rounded-xl
 font-semibold
-transition
+transition-all
+duration-300
 hover:scale-105
+hover:border
+hover:border-blue-500/40
+hover:shadow-[0_0_25px_rgba(59,130,246,0.25)]
 "
   >
     View All Trends →
