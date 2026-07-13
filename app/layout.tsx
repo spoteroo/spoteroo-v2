@@ -109,10 +109,10 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
+  icon: "/favicon.png",
+  shortcut: "/favicon.png",
+  apple: "/apple-touch-icon.png",
+},
 
   formatDetection: {
     email: false,
@@ -162,7 +162,7 @@ export default function RootLayout({
                   "@id": "https://spoteroo.com/#organization",
                   name: "Spoteroo",
                   url: "https://spoteroo.com",
-                  logo: "https://spoteroo.com/logo.svg",
+                  logo: "https://spoteroo.com/SPOTEROO%20NEW%20LOGO1.png",
                   description:
                     "AI-powered opportunity intelligence platform.",
                   foundingDate: "2026",
