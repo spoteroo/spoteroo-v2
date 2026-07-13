@@ -87,7 +87,29 @@ Example:
 `,
     });
 
-    let trends: any[] = [];
+    type GeneratedTrend = {
+  title: string;
+  description: string;
+  category: string;
+  score: number;
+  reason: string;
+  startup_idea: string;
+  market_analysis: string;
+  competitors: string;
+  risks: string;
+  opportunity_score: number;
+  momentum: string;
+  investment_rating: string;
+  competition_level: string;
+  market_size: string;
+  forecast_30d: number;
+  forecast_90d: number;
+  forecast_1y: number;
+  success_probability: number;
+  unicorn_potential: number;
+};
+
+let trends: GeneratedTrend[] = [];
 
     try {
       trends = JSON.parse(response.output_text ?? "[]");

@@ -1,5 +1,8 @@
-const DODO_API_URL =
-  process.env.DODO_PAYMENTS_ENVIRONMENT === "live"
+import DodoPayments from "dodopayments";
+
+
+environment:
+  process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode"
     ? "https://live.dodopayments.com"
     : "https://test.dodopayments.com";
 
@@ -34,3 +37,12 @@ export async function getSubscription(subscriptionId: string) {
 export async function getInvoices(customerId: string) {
   return dodoRequest(`/customers/${customerId}/invoices`);
 }
+
+export const dodo = new DodoPayments({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
+  environment:
+    process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode"
+      ? "live_mode"
+      : "test_mode",
+  webhookKey: process.env.DODO_PAYMENTS_WEBHOOK_KEY!,
+});

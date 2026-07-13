@@ -45,16 +45,18 @@ const renewalDate = profile?.subscription_expires_at
   ? new Date(profile.subscription_expires_at)
   : null;
 
+const currentDate = new Date();
+
 const daysRemaining = renewalDate
   ? Math.max(
       0,
       Math.ceil(
-        (renewalDate.getTime() - Date.now()) /
+        (renewalDate.getTime() - currentDate.getTime()) /
           (1000 * 60 * 60 * 24)
       )
     )
   : null;
-
+  
 return (
 <main className="min-h-screen bg-black text-white px-4 py-8 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-6xl space-y-8">

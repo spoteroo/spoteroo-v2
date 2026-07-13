@@ -33,11 +33,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const allowed = await canUseFeature(
-      email,
-      "startup_ideas",
-      3
-    );
+    cconst allowed = await canUseFeature(
+  email,
+  "startup_ideas",
+  5
+);
 
     if (!allowed) {
       return NextResponse.json(

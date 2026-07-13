@@ -26,7 +26,9 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
 
-    useEffect(() => {
+   // Close the mobile menu whenever navigation changes.
+// eslint-disable-next-line react-hooks/set-state-in-effect
+useEffect(() => {
   setMobileMenuOpen(false);
 }, [pathname]);
 

@@ -54,7 +54,7 @@ export async function GET() {
       startupIdeasRemaining:
         profile.plan === "pro"
           ? "Unlimited"
-          : Math.max(0, 3 - startupIdeas),
+          : Math.max(0, 5 - startupIdeas),
 
       premiumReportsRemaining:
         profile.plan === "pro"

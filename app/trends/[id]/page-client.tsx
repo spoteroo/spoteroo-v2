@@ -8,6 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import UpgradePrompt from "@/app/components/UpgradePrompt";
 import TrendHistoryChart from "@/app/components/charts/TrendHistoryChart";
 import { toast } from "sonner";
+import TrendHero from "./components/TrendHero";
+import MetricsGrid from "./components/MetricsGrid";
+import AIForecast from "./components/AIForecast";
+import AIIntelligence from "./components/AIIntelligence";
+import OpportunityRisk from "./components/OpportunityRisk";
+import InsightCards from "./components/InsightCards";
 
 type Trend = {
   id: number;
@@ -402,7 +408,7 @@ doc.text(
   }}
 />
 
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto w-full max-w-screen-2xl">
       <script
   type="application/ld+json"
   suppressHydrationWarning
@@ -433,612 +439,573 @@ doc.text(
     }),
   }}
 />
+<Link
+  href="/trends"
+  className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors mb-8"
+>
+  ← Back to Trends
+</Link>
 
-        <Link
-          href="/trends"
-          className="text-blue-400 hover:text-blue-300 mb-6 inline-block"
-        >
-          ← Back to Trends
-        </Link>
+<TrendHero trend={trend} />
+
+<MetricsGrid trend={trend} />
+
+<AIForecast trend={trend} />
+
+<AIIntelligence trend={trend} />
+
+<OpportunityRisk trend={trend} />
+
+<InsightCards trend={trend} />
+
+
+
+          <section className="glass rounded-3xl p-6 mb-10">
+
+  <div className="flex flex-wrap items-center gap-4">
+
+    <button
+      onClick={generateIdea}
+      disabled={loadingIdea}
+      className="rounded-xl bg-blue-600 px-5 py-3 font-medium transition hover:bg-blue-700 disabled:opacity-50"
+    >
+      {loadingIdea ? "Generating..." : "💡 Startup Idea"}
+    </button>
+
+    {isPro && (
+      <button
+        onClick={generatePremiumReport}
+        disabled={loadingReport}
+        className="rounded-xl bg-cyan-600 px-5 py-3 font-medium transition hover:bg-cyan-700 disabled:opacity-50"
+      >
+        {loadingReport ? "Generating..." : "📄 Premium Report"}
+      </button>
+    )}
+
+    <button
+      onClick={downloadPDF}
+      className="rounded-xl bg-purple-600 px-5 py-3 font-medium transition hover:bg-purple-700"
+    >
+      ⬇ Download PDF
+    </button>
+
+    <button
+      onClick={async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user?.email) {
+          toast.error("Please login first");
+          return;
+        }
+
+        const { data: existing } = await supabase
+          .from("favorites")
+          .select("id")
+          .eq("user_email", user.email)
+          .eq("trend_id", trend.id)
+          .maybeSingle();
+
+        if (existing) {
+          toast.info("Already saved!");
+          return;
+        }
+
+        const { error } = await supabase
+          .from("favorites")
+          .insert({
+            trend_id: trend.id,
+            user_email: user.email,
+          });
+
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+
+        toast.success("Trend saved!");
+      }}
+      className="rounded-xl bg-yellow-600 px-5 py-3 font-medium transition hover:bg-yellow-700"
+    >
+      ⭐ Save
+    </button>
+
+    <button
+      onClick={() => window.print()}
+      className="rounded-xl bg-green-600 px-5 py-3 font-medium transition hover:bg-green-700"
+    >
+      🖨 Print
+    </button>
+
+    <button
+      onClick={async () => {
+        if (navigator.share) {
+          await navigator.share({
+            title: trend.title,
+            url: window.location.href,
+          });
+        } else {
+          await navigator.clipboard.writeText(window.location.href);
+          toast.success("Link copied!");
+        }
+      }}
+      className="rounded-xl bg-slate-700 px-5 py-3 font-medium transition hover:bg-slate-600"
+    >
+      🔗 Share
+    </button>
+
+  </div>
+
+</section>
+
+<div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-10">
+
+  {/* Description */}
+
+  <section className="glass rounded-3xl p-8">
+
+    <div className="flex items-center gap-3 mb-6">
+
+      <div className="h-10 w-10 rounded-xl bg-blue-500/15 flex items-center justify-center text-xl">
+        📖
+      </div>
+
+      <div>
+
+        <h2 className="text-2xl font-bold">
+          Description
+        </h2>
+
+        <p className="text-slate-400 text-sm">
+          Overview of the trend
+        </p>
+
+      </div>
+
+    </div>
+
+    <p className="text-slate-300 leading-8 whitespace-pre-wrap">
+      {trend.description}
+    </p>
+
+  </section>
+
+  {/* Why This Trend Matters */}
+
+  {trend.reason && (
+
+    <section className="glass rounded-3xl p-8 border border-blue-500/20">
+
+      <div className="flex items-center gap-3 mb-6">
+
+        <div className="h-10 w-10 rounded-xl bg-cyan-500/15 flex items-center justify-center text-xl">
+          💡
+        </div>
 
         <div>
 
-  <h1
-    className="
-      text-4xl
-      sm:text-5xl
-      lg:text-6xl
-      font-extrabold
-      leading-tight
-      bg-gradient-to-r
-      from-white
-      via-blue-300
-      to-cyan-400
-      bg-clip-text
-      text-transparent
-    "
-  >
-    {trend.title}
-  </h1>
+          <h2 className="text-2xl font-bold">
+            Why This Trend Matters
+          </h2>
 
-  <div className="mt-6 flex flex-wrap items-center gap-4">
+          <p className="text-slate-400 text-sm">
+            AI market reasoning
+          </p>
 
-    <div
-      className="
-        flex
-        h-16
-        w-16
-        items-center
-        justify-center
-        rounded-full
-        bg-green-500/15
-        border
-        border-green-500/20
-        text-green-300
-        text-xl
-        font-bold
-      "
-    >
-      {trend.score}
-    </div>
+        </div>
 
-    <span
-      className="
-        rounded-full
-        border
-        border-blue-500/20
-        bg-blue-500/15
-        px-4
-        py-2
-        text-blue-300
-        font-medium
-      "
-    >
-      {trend.category}
-    </span>
+      </div>
 
-  </div>
-
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8 mb-10">
-
-    <div
-      className="
-        glass
-        rounded-2xl
-        p-5
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:border
-        hover:border-blue-500/40
-      "
-    >
-      <p className="text-slate-400 text-sm">
-        Opportunity Score
+      <p className="text-slate-300 leading-8 whitespace-pre-wrap">
+        {trend.reason}
       </p>
 
-      <h2 className="text-3xl font-bold text-green-400">
-        {trend.opportunity_score ?? "-"}
-      </h2>
-    </div>
+    </section>
 
-    <div
-      className="
-        glass
-        rounded-2xl
-        p-5
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:border
-        hover:border-blue-500/40
-      "
-    >
-      <p className="text-slate-400 text-sm">
-        Momentum
-      </p>
-
-      <h2 className="text-2xl font-bold text-blue-400">
-        {trend.momentum ?? "-"}
-      </h2>
-    </div>
-
-    <div
-      className="
-        glass
-        rounded-2xl
-        p-5
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:border
-        hover:border-blue-500/40
-      "
-    >
-      <p className="text-slate-400 text-sm">
-        Investment Rating
-      </p>
-
-      <h2 className="text-2xl font-bold text-yellow-400">
-        {trend.investment_rating ?? "-"}
-      </h2>
-    </div>
-
-    <div
-      className="
-        glass
-        rounded-2xl
-        p-5
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:border
-        hover:border-blue-500/40
-      "
-    >
-      <p className="text-slate-400 text-sm">
-        Competition
-      </p>
-
-      <h2 className="text-2xl font-bold">
-        {trend.competition_level ?? "-"}
-      </h2>
-    </div>
-
-    <div
-      className="
-        glass
-        rounded-2xl
-        p-5
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:border
-        hover:border-blue-500/40
-      "
-    >
-      <p className="text-slate-400 text-sm">
-        Market Size
-      </p>
-
-      <h2 className="text-2xl font-bold text-cyan-400">
-        {trend.market_size ?? "-"}
-      </h2>
-    </div>
-
-  </div>
+  )}
 
 </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8 mb-10">
+
+          <section className="glass rounded-3xl p-8 mb-10">
+
+  <div className="text-center mb-8">
+
+    <h2 className="text-3xl font-bold">
+      👥 Community Feedback
+    </h2>
+
+    <p className="text-slate-400 mt-3">
+      Vote to improve Spoteroo's AI opportunity rankings.
+    </p>
+
+  </div>
+
+  <div className="flex justify-center mb-8">
+
+    <div className="glass rounded-3xl px-10 py-6 text-center">
+
+      <p className="text-sm uppercase tracking-widest text-slate-400">
+        Current Score
+      </p>
+
+      <h3 className="mt-3 text-6xl font-black text-green-400">
+        {trend.score}
+      </h3>
+
+    </div>
+
+  </div>
+
+  <div className="flex flex-wrap justify-center gap-5">
+
+    <button
+      onClick={async () => {
+        const response = await fetch("/api/vote", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            trendId: trend.id,
+            voteType: "upvote",
+          }),
+        });
+
+        if (!response.ok) {
+          toast.error("Unable to record vote.");
+          return;
+        }
+
+        const { data: refreshedTrend } = await supabase
+          .from("trends")
+          .select("score")
+          .eq("id", trend.id)
+          .single();
+
+        if (refreshedTrend) {
+          setTrend({
+            ...trend,
+            score: refreshedTrend.score,
+          });
+        }
+
+        toast.success("Thanks for your vote!");
+      }}
+      className="
+        rounded-2xl
+        bg-green-600
+        hover:bg-green-700
+        px-8
+        py-4
+        text-lg
+        font-semibold
+        transition-all
+        hover:scale-105
+      "
+    >
+      👍 Upvote
+    </button>
+
+    <button
+      onClick={async () => {
+        const response = await fetch("/api/vote", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            trendId: trend.id,
+            voteType: "downvote",
+          }),
+        });
+
+        if (!response.ok) {
+          toast.error("Unable to record vote.");
+          return;
+        }
+
+        const { data: refreshedTrend } = await supabase
+          .from("trends")
+          .select("score")
+          .eq("id", trend.id)
+          .single();
+
+        if (refreshedTrend) {
+          setTrend({
+            ...trend,
+            score: refreshedTrend.score,
+          });
+        }
+
+        toast.success("Vote recorded!");
+      }}
+      className="
+        rounded-2xl
+        bg-red-600
+        hover:bg-red-700
+        px-8
+        py-4
+        text-lg
+        font-semibold
+        transition-all
+        hover:scale-105
+      "
+    >
+      👎 Downvote
+    </button>
+
+  </div>
+
+</section>
 
           <div className="glass rounded-3xl p-8 mb-10">
 
-            <h2 className="text-3xl font-bold mb-8">
-              📈 AI Forecast
-            </h2>
+  <div className="flex items-center justify-between mb-8">
 
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+    <div>
 
-              <div className="glass rounded-2xl p-5">
-                <p className="text-slate-400">
-                  30 Days
-                </p>
+      <h2 className="text-3xl font-bold">
+        💡 AI Startup Idea
+      </h2>
 
-                <p className="text-3xl font-bold text-green-400">
-                  +{trend.forecast_30d ?? 0}%
-                </p>
-              </div>
-
-              <div className="glass rounded-2xl p-5">
-                <p className="text-slate-400">
-                  90 Days
-                </p>
-
-                <p className="text-3xl font-bold text-blue-400">
-                  +{trend.forecast_90d ?? 0}%
-                </p>
-              </div>
-
-              <div className="glass rounded-2xl p-5">
-                <p className="text-slate-400">
-                  1 Year
-                </p>
-
-                <p className="text-3xl font-bold text-cyan-400">
-                  +{trend.forecast_1y ?? 0}%
-                </p>
-              </div>
-
-              <div className="glass rounded-2xl p-5">
-                <p className="text-slate-400">
-                  Success
-                </p>
-
-                <p className="text-3xl font-bold text-yellow-400">
-                  {trend.success_probability ?? 0}%
-                </p>
-              </div>
-
-              <div className="glass rounded-2xl p-5">
-                <p className="text-slate-400">
-                  Unicorn Chance
-                </p>
-
-                <p className="text-3xl font-bold text-pink-400">
-                  {trend.unicorn_potential ?? 0}%
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="flex flex-wrap gap-4 mt-8">
-
-            <button
-              onClick={downloadPDF}
-              className="bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-xl"
-            >
-              Download PDF
-            </button>
-
-            <button
-              onClick={() => {
-  window.print();
-}}
-              className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl"
-            >
-              Print
-            </button>
-
-            <button
-              onClick={async () => {
-                if (navigator.share) {
-                  await navigator.share({
-                    title: trend.title,
-                    url: window.location.href,
-                  });
-                } else {
-                  await navigator.clipboard.writeText(
-                    window.location.href
-                  );
-
-                  toast.success(
-                    "Link copied!"
-                  );
-                }
-              }}
-              className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl"
-            >
-              Share
-            </button>
-
-            <button
-              onClick={async () => {
-                await navigator.clipboard.writeText(
-                  window.location.href
-                );
-
-                toast.success(
-                  "Link copied!"
-                );
-              }}
-              className="bg-slate-700 hover:bg-slate-600 px-5 py-3 rounded-xl"
-            >
-              Copy Link
-            </button>
-
-                        <button
-  onClick={async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-
-    if (!user?.email) {
-      toast.error("Please login first");
-      return;
-    }
-
-    const { data: existing } = await supabase
-      .from("favorites")
-      .select("id")
-      .eq("user_email", user.email)
-      .eq("trend_id", trend.id)
-      .maybeSingle();
-
-    if (existing) {
-      toast.info("Already saved!");
-      return;
-    }
-
-    const { error } = await supabase
-  .from("favorites")
-  .insert({
-    trend_id: trend.id,
-    user_email: user.email,
-  });
-
-if (error) {
-  toast.error(error.message);
-  return;
-}
-
-toast.success("Trend saved!");
-  }}
-  className="bg-yellow-600 hover:bg-yellow-700 px-5 py-3 rounded-xl"
->
-  ⭐ Save Trend
-</button>
-
-            {isPro && (
-              <button
-                onClick={
-                  generatePremiumReport
-                }
-                disabled={
-                  loadingReport
-                }
-                className="bg-cyan-600 hover:bg-cyan-700 px-5 py-3 rounded-xl disabled:opacity-50"
-              >
-                {loadingReport
-                  ? "Generating..."
-                  : "Premium Report"}
-              </button>
-            )}
-
-          </div>
-
-          <div
-  className="
-    glass
-    rounded-3xl
-    p-8
-    mb-8
-  "
->
-
-            <h2 className="text-3xl font-bold mb-4">
-              Description
-            </h2>
-
-            <p className="text-slate-300 leading-8">
-              {trend.description}
-            </p>
-
-          </div>
-
-          {trend.reason && (
-
-            <div
-  className="
-    glass
-    rounded-3xl
-    p-8
-    mb-8
-    border
-    border-blue-500/20
-  "
->
-
-              <h2 className="text-3xl font-bold mb-4">
-                Why This Trend Matters
-              </h2>
-
-              <p className="text-slate-300 leading-8">
-                {trend.reason}
-              </p>
-
-            </div>
-
-          )}
-
-          <div className="flex flex-wrap gap-4 mb-8">
-
-            <button
-  onClick={async () => {
-    const response = await fetch(
-      "/api/vote",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          trendId: trend.id,
-          voteType: "upvote",
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      toast.error("Unable to record vote.");
-      return;
-    }
-
-    const { data: refreshedTrend } =
-      await supabase
-        .from("trends")
-        .select("score")
-        .eq("id", trend.id)
-        .single();
-
-    if (refreshedTrend) {
-      setTrend({
-        ...trend,
-        score: refreshedTrend.score,
-      });
-    }
-
-    toast.success("Thanks for your vote!");
-  }}
-  className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl"
->
-  👍 Upvote
-</button>
-                
-
-            <button
-              onClick={async () => {
-                const response = await fetch("/api/vote", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    trendId: trend.id,
-    voteType: "downvote",
-  }),
-});
-
-if (!response.ok) {
-  toast.error("Unable to record vote.");
-  return;
-}
-
-const { data: refreshedTrend } =
-  await supabase
-    .from("trends")
-    .select("score")
-    .eq("id", trend.id)
-    .single();
-
-if (refreshedTrend) {
-  setTrend({
-    ...trend,
-    score: refreshedTrend.score,
-  });
-}
-
-toast.success("Vote recorded!");
-              }}
-              className="bg-red-600 hover:bg-red-700 px-5 py-3 rounded-xl"
-            >
-              👎 Downvote
-            </button>
-
-          </div>
-
-          <div className="glass p-6 mb-6">
-
-            <div className="flex flex-col sm:flex-row justify-between gap-4">
-
-              <h2 className="text-3xl font-bold mb-6">
-                AI Startup Idea
-              </h2>
-
-              <button
-                onClick={generateIdea}
-                disabled={loadingIdea}
-                className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl disabled:opacity-50"
-              >
-                {loadingIdea
-                  ? "Generating..."
-                  : "Generate Startup Idea"}
-              </button>
-
-            </div>
-
-            {trend.startup_idea ? (
-
-  <div className="mt-6 space-y-8">
-
-    <div className="glass rounded-2xl p-6">
-      <h3 className="text-xl font-semibold mb-2">
-        Startup Idea
-      </h3>
-
-      <p className="text-slate-300 whitespace-pre-wrap leading-8">
-        {trend.startup_idea}
+      <p className="text-slate-400 mt-2">
+        AI-generated business opportunity based on this trend.
       </p>
-    </div>
 
-    <div className="glass rounded-2xl p-6">
-      <h3 className="text-xl font-semibold mb-2">
-        Market Analysis
-      </h3>
-
-      <p className="text-slate-300 whitespace-pre-wrap leading-8">
-        {trend.market_analysis}
-      </p>
-    </div>
-
-    <div className="glass rounded-2xl p-6">
-      <h3 className="text-xl font-semibold mb-2">
-        Competitors
-      </h3>
-
-      <p className="text-slate-300 whitespace-pre-wrap leading-8">
-        {trend.competitors}
-      </p>
-    </div>
-
-    <div className="glass rounded-2xl p-6">
-      <h3 className="text-xl font-semibold mb-2">
-        Risks
-      </h3>
-
-      <p className="text-slate-300 whitespace-pre-wrap leading-8">
-        {trend.risks}
-      </p>
     </div>
 
   </div>
 
-) : (
+  {trend.startup_idea ? (
 
-  <div className="glass rounded-2xl p-6 mt-6">
-    <p className="text-slate-500">
-      No startup idea generated yet.
-    </p>
-  </div>
+    <div className="grid gap-6">
 
-)}
+      {/* Startup Idea */}
 
-          </div>
+      <div className="glass rounded-2xl p-6">
+
+        <h3 className="text-xl font-bold text-blue-400 mb-4">
+          🚀 Startup Idea
+        </h3>
+
+        <p className="text-slate-300 whitespace-pre-wrap leading-8">
+          {trend.startup_idea}
+        </p>
+
+      </div>
+
+      {/* Market */}
+
+      <div className="glass rounded-2xl p-6">
+
+        <h3 className="text-xl font-bold text-green-400 mb-4">
+          📈 Market Analysis
+        </h3>
+
+        <p className="text-slate-300 whitespace-pre-wrap leading-8">
+          {trend.market_analysis}
+        </p>
+
+      </div>
+
+      {/* Competitors */}
+
+      <div className="glass rounded-2xl p-6">
+
+        <h3 className="text-xl font-bold text-purple-400 mb-4">
+          🏢 Competitors
+        </h3>
+
+        <p className="text-slate-300 whitespace-pre-wrap leading-8">
+          {trend.competitors}
+        </p>
+
+      </div>
+
+      {/* Risks */}
+
+      <div className="glass rounded-2xl p-6">
+
+        <h3 className="text-xl font-bold text-red-400 mb-4">
+          ⚠ Risks
+        </h3>
+
+        <p className="text-slate-300 whitespace-pre-wrap leading-8">
+          {trend.risks}
+        </p>
+
+      </div>
+
+    </div>
+
+  ) : (
+
+    <div className="glass rounded-2xl p-12 text-center">
+
+      <div className="text-6xl mb-6">
+        💡
+      </div>
+
+      <h3 className="text-2xl font-bold mb-3">
+        No Startup Idea Yet
+      </h3>
+
+      <p className="text-slate-400 max-w-xl mx-auto leading-8">
+        Click the "Startup Idea" button above to let Spoteroo's AI generate a complete startup opportunity based on this emerging trend.
+      </p>
+
+    </div>
+
+  )}
+
+</div>
+
 
           {isPro ? (
 
-            <div className="glass p-6 mb-6">
+  <section className="glass rounded-3xl p-8 mb-10">
 
-              <h2 className="text-2xl sm:text-3xl font-bold mb-6">
-                Premium Investment Report
-              </h2>
+    <div className="flex items-center justify-between mb-8">
 
-              {trend.premium_report ? (
+      <div>
 
-                <div
-  className="
-    glass
-    rounded-2xl
-    p-6
-    whitespace-pre-wrap
-    leading-8
-    text-slate-300
-  "
->
-                  {trend.premium_report}
-                </div>
+        <h2 className="text-3xl font-bold">
+          📄 Premium Investment Report
+        </h2>
 
-              ) : (
+        <p className="text-slate-400 mt-2">
+          AI-generated investment research and market intelligence.
+        </p>
 
-                <p className="text-slate-500">
-                  Click "Premium Report" to generate an investment report.
-                </p>
+      </div>
 
-              )}
+      {trend.premium_report && (
 
-            </div>
+        <button
+          onClick={async () => {
+            await navigator.clipboard.writeText(
+              trend.premium_report ?? ""
+            );
 
-          ) : (
+            toast.success("Report copied!");
+          }}
+          className="rounded-xl bg-slate-700 hover:bg-slate-600 px-5 py-3"
+        >
+          📋 Copy Report
+        </button>
 
-            <UpgradePrompt />
+      )}
 
-          )}
+    </div>
 
-          <TrendHistoryChart
-            data={history}
-          />
+    {trend.premium_report ? (
+
+      <div
+        className="
+          glass
+          rounded-2xl
+          p-8
+          max-h-[700px]
+          overflow-y-auto
+        "
+      >
+
+        <article
+          className="
+            whitespace-pre-wrap
+            leading-8
+            text-slate-300
+            prose
+            prose-invert
+            max-w-none
+          "
+        >
+          {trend.premium_report}
+        </article>
+
+      </div>
+
+    ) : (
+
+      <div className="glass rounded-2xl p-12 text-center">
+
+        <div className="text-6xl mb-6">
+          📄
+        </div>
+
+        <h3 className="text-2xl font-bold mb-3">
+          No Premium Report Yet
+        </h3>
+
+        <p className="text-slate-400 max-w-xl mx-auto leading-8">
+          Click the "Premium Report" button above to generate a detailed
+          investment report, competitor analysis, market outlook,
+          opportunities, risks, and strategic recommendations.
+        </p>
+
+      </div>
+
+    )}
+
+  </section>
+
+) : (
+
+  <UpgradePrompt />
+
+)}
+
+          <section className="glass rounded-3xl p-8 mb-10">
+
+  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+
+    <div>
+
+      <h2 className="text-3xl font-bold">
+        📈 Trend History
+      </h2>
+
+      <p className="text-slate-400 mt-2">
+        Historical opportunity score performance over time.
+      </p>
+
+    </div>
+
+    <div className="flex gap-4">
+
+      <div className="glass rounded-2xl px-6 py-4">
+
+        <p className="text-xs uppercase tracking-wider text-slate-400">
+          Current Score
+        </p>
+
+        <p className="text-3xl font-black text-green-400">
+          {trend.score}
+        </p>
+
+      </div>
+
+      <div className="glass rounded-2xl px-6 py-4">
+
+        <p className="text-xs uppercase tracking-wider text-slate-400">
+          History
+        </p>
+
+        <p className="text-3xl font-black text-blue-400">
+          {history.length}
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <TrendHistoryChart data={history} />
+
+</section>
+          
 
         </div>
 

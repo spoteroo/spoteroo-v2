@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { buildPremiumPrompt } from "./prompt";
+import { parsePremiumReport } from "./parser";
 
 import { requireUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
@@ -34,10 +36,10 @@ export async function POST(req: Request) {
     }
 
     const allowed = await canUseFeature(
-      email,
-      "premium_reports",
-      1
-    );
+  email,
+  "premium_reports",
+  2
+);
 
     if (!allowed) {
       return NextResponse.json(
@@ -63,42 +65,28 @@ export async function POST(req: Request) {
     }
 
     const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
-      input: [
-        {
-          role: "system",
-          content:
-            "You are a senior startup strategist and venture capital analyst. Produce professional, structured reports.",
-        },
-        {
-          role: "user",
-          content: `
-Trend:
-${title}
+  model: "gpt-4.1-mini",
+  input: [
+    {
+      role: "system",
+      content:
+        "You are Spoteroo AI. Return only valid JSON that matches the requested schema.",
+    },
+    {
+      role: "user",
+      content: buildPremiumPrompt(
+        title,
+        description
+      ),
+    },
+  ],
+});
 
-Description:
-${description}
+    const output = response.output_text ?? "";
 
-Create a professional startup investment report.
+const parsed = parsePremiumReport(output);
 
-Include:
-
-1. Executive Summary
-2. SWOT Analysis
-3. TAM / SAM / SOM
-4. Competitor Analysis
-5. Revenue Models
-6. Go-To-Market Strategy
-7. Funding Potential
-8. Exit Opportunities
-9. Risks
-10. Recommendation
-`,
-        },
-      ],
-    });
-
-    const report = response.output_text ?? "";
+const report = parsed.premiumReport;
 
     const { error } = await supabaseAdmin
       .from("trends")

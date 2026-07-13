@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { upgradeUser, downgradeUser } from "@/lib/subscription";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { dodo } from "@/lib/dodo";
 
 export async function GET() {
   return NextResponse.json({
@@ -19,42 +20,54 @@ export async function POST(request: Request) {
     // https://docs.dodopayments.com/developer-resources/webhooks
     // ------------------------------------------------------------------
 
-    const payload = await request.json();
+    const body = await request.text();
 
-    console.log(JSON.stringify(payload, null, 2));
+const headers = {
+  "webhook-id": request.headers.get("webhook-id") ?? "",
+  "webhook-signature":
+    request.headers.get("webhook-signature") ?? "",
+  "webhook-timestamp":
+    request.headers.get("webhook-timestamp") ?? "",
+};
 
-    const event = payload?.type;
+const payload = dodo.webhooks.unwrap(body, {
+  headers,
+});
 
-    if (!event) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Missing event type",
-        },
-        {
-          status: 400,
-        }
-      );
+console.log(JSON.stringify(payload, null, 2));
+
+const event = payload?.type;
+
+if (!event) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Missing event type",
+    },
+    {
+      status: 400,
     }
+  );
+}
 
-    console.log("Webhook Event:", event);
+console.log("Webhook Event:", event);
 
-    const email =
-      payload?.data?.customer?.email ??
-      payload?.data?.email ??
-      null;
+const email =
+  payload?.data?.customer?.email ??
+  payload?.data?.email ??
+  null;
 
-    if (!email) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Customer email missing",
-        },
-        {
-          status: 400,
-        }
-      );
+if (!email) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: "Customer email missing",
+    },
+    {
+      status: 400,
     }
+  );
+}
 
     const customerId =
       payload?.data?.customer?.customer_id ??

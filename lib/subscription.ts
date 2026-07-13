@@ -28,21 +28,29 @@ export async function isPro(email: string) {
 }
 
 export async function upgradeUser(email: string) {
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       plan: "pro",
     })
     .eq("email", email);
+
+  if (error) {
+    console.error("Upgrade failed:", error);
+  }
 }
 
 export async function downgradeUser(email: string) {
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       plan: "free",
     })
     .eq("email", email);
+
+  if (error) {
+    console.error("Downgrade failed:", error);
+  }
 }
 
 export const PLAN_LIMITS = {
