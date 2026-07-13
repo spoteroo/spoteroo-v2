@@ -1005,12 +1005,9 @@ doc.text(
   <TrendHistoryChart data={history} />
 
 </section>
-          
 
-        </div>
+    </div>
 
-      </div>
-
-    </main>
-  );
+  </main>
+);
 }
