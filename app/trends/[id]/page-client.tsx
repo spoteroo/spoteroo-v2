@@ -9,7 +9,7 @@ import UpgradePrompt from "@/app/components/UpgradePrompt";
 import TrendHistoryChart from "@/app/components/charts/TrendHistoryChart";
 import { toast } from "sonner";
 import TrendHero from "./components/TrendHero";
-import MetricsGrid from "./components/MetricsGrid";
+// import MetricsGrid from "./components/MetricsGrid";
 import AIForecast from "./components/AIForecast";
 import AIIntelligence from "./components/AIIntelligence";
 import OpportunityRisk from "./components/OpportunityRisk";
@@ -448,7 +448,7 @@ doc.text(
 
 <TrendHero trend={trend} />
 
-<MetricsGrid trend={trend} />
+{/* <MetricsGrid trend={trend} /> */}
 
 <AIForecast trend={trend} />
 
