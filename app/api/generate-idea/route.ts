@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       );
     }
 
-    cconst allowed = await canUseFeature(
+    const allowed = await canUseFeature(
   email,
   "startup_ideas",
   5
