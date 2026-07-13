@@ -1,7 +1,7 @@
 import DodoPayments from "dodopayments";
 
 
-environment:
+  const DODO_API_URL =
   process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode"
     ? "https://live.dodopayments.com"
     : "https://test.dodopayments.com";
