@@ -52,9 +52,11 @@ if (!event) {
 
 console.log("Webhook Event:", event);
 
+const data = payload.data as any;
+
 const email =
-  payload?.data?.customer?.email ??
-  payload?.data?.email ??
+  data?.customer?.email ??
+  data?.email ??
   null;
 
 if (!email) {
@@ -70,24 +72,24 @@ if (!email) {
 }
 
     const customerId =
-      payload?.data?.customer?.customer_id ??
-      payload?.data?.customer_id ??
-      null;
+  data?.customer?.customer_id ??
+  data?.customer_id ??
+  null;
 
-    const subscriptionId =
-      payload?.data?.subscription?.subscription_id ??
-      payload?.data?.subscription_id ??
-      null;
+const subscriptionId =
+  data?.subscription?.subscription_id ??
+  data?.subscription_id ??
+  null;
 
-    const subscriptionStatus =
-      payload?.data?.status ??
-      "active";
+const subscriptionStatus =
+  data?.status ??
+  "active";
 
-    const subscriptionExpiresAt =
-      payload?.data?.subscription?.current_period_end ??
-      payload?.data?.current_period_end ??
-      payload?.data?.expires_at ??
-      null;
+const subscriptionExpiresAt =
+  data?.subscription?.current_period_end ??
+  data?.current_period_end ??
+  data?.expires_at ??
+  null;
 
     //-------------------------------------------------------------------
     // Upgrade Events
